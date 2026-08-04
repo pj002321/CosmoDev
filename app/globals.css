@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0b;
+  --surface: #131316;
+  --border: #26262b;
+  --foreground: #e4e4e7;
+  --muted: #8b8b93;
+  --accent: #a3e635;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.prose-post {
+  font-size: 0.975rem;
+  line-height: 1.8;
+  color: var(--foreground);
+}
+
+.prose-post h2 {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-post p {
+  margin-bottom: 1rem;
+}
+
+.prose-post a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose-post ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.prose-post li {
+  margin-bottom: 0.35rem;
+}
+
+.prose-post code {
+  font-family: var(--font-mono);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+}
+
+.prose-post pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1.25rem;
+}
+
+.prose-post pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.prose-post blockquote {
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  color: var(--muted);
+  font-style: italic;
+  margin: 1.25rem 0;
+}

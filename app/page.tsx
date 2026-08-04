@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/posts";
 
-export default function Home() {
-  const posts = getAllPosts();
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const posts = await getAllPosts();
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">

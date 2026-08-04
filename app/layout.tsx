@@ -30,7 +30,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="font-mono text-sm tracking-wide">
               <span className="text-accent">▸</span> DEVLOG
             </Link>
-            <span className="font-mono text-xs text-muted">개인 개발 일지</span>
+            <div className="flex items-center gap-4">
+              <span className="font-mono text-xs text-muted">개인 개발 일지</span>
+              <Link
+                href="/admin"
+                className="font-mono text-xs text-muted hover:text-accent"
+              >
+                admin
+              </Link>
+            </div>
           </div>
         </header>
         <main className="flex-1">{children}</main>

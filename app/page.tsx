@@ -8,8 +8,8 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
-      <p className="font-mono text-xs text-muted mb-2 animate-fade-in-up">▸ ARCHIVE</p>
-      <h1 className="text-2xl font-semibold mb-10 animate-fade-in-up">모든 글</h1>
+      <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ ARCHIVE</p>
+      <h1 className="text-2xl font-semibold mb-10 animate-fade-in">모든 글</h1>
 
       <div className="flex flex-col gap-4">
         {posts.map((post, i) => (
@@ -17,7 +17,7 @@ export default async function Home() {
             key={post.slug}
             href={`/posts/${post.slug}`}
             style={{ animationDelay: `${i * 60}ms` }}
-            className="post-card group animate-fade-in-up border border-border rounded-lg p-5 bg-surface hover:border-accent"
+            className="post-card group border border-border rounded-lg p-5 bg-surface hover:border-accent"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="font-mono text-xs text-muted">{post.date}</span>

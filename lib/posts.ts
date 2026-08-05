@@ -54,6 +54,10 @@ export function slugify(title: string, date: string): string {
   return base ? `${date}-${base}-${id}` : `${date}-${id}`;
 }
 
+export function uniqueTags(posts: { tags: string[] }[]): string[] {
+  return [...new Set(posts.flatMap((p) => p.tags))];
+}
+
 export async function getAllPosts(): Promise<PostMeta[]> {
   const rows = (await sql()`
     SELECT slug, title, date, summary, tags, author_id, author_name

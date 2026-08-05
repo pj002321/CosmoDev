@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
-import { getPostsByAuthor } from "@/lib/posts";
+import { getPostsByAuthor, uniqueTags } from "@/lib/posts";
+import { getTagline } from "@/lib/profiles";
+import EditableTagline from "@/components/EditableTagline";
 
 export const dynamic = "force-dynamic";
 
@@ -46,13 +48,27 @@ export default async function Home() {
   }
 
   const posts = await getPostsByAuthor(userId);
+  const tagline = (await getTagline(userId)) ?? "내가 쓴 글";
+  const categories = uniqueTags(posts);
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
       <div className="flex items-center justify-between mb-10">
         <div>
           <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ MY ARCHIVE</p>
-          <h1 className="text-2xl font-semibold animate-fade-in">내가 쓴 글</h1>
+          <EditableTagline initialValue={tagline} />
+          {categories.length > 0 && (
+            <div className="flex gap-1.5 mt-2 flex-wrap">
+              {categories.map((tag) => (
+                <span
+                  key={tag}
+                  className="font-mono text-[11px] uppercase tracking-wide text-muted border border-border rounded px-1.5 py-0.5"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <Link
           href="/write"

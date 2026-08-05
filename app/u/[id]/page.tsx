@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPostsByAuthor } from "@/lib/posts";
+import { getPostsByAuthor, uniqueTags } from "@/lib/posts";
+import { getTagline } from "@/lib/profiles";
 import { UserIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,8 @@ export default async function ProfilePage({
   const { id } = await params;
   const posts = await getPostsByAuthor(id);
   if (posts.length === 0) notFound();
+  const tagline = (await getTagline(id)) ?? `${posts[0].authorName}의 글`;
+  const categories = uniqueTags(posts);
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
@@ -22,9 +25,19 @@ export default async function ProfilePage({
         </span>
         <div>
           <p className="font-mono text-xs text-muted animate-fade-in">▸ PROFILE</p>
-          <h1 className="text-xl font-semibold animate-fade-in">
-            {posts[0].authorName}의 글
-          </h1>
+          <h1 className="text-xl font-semibold animate-fade-in">{tagline}</h1>
+          {categories.length > 0 && (
+            <div className="flex gap-1.5 mt-2 flex-wrap">
+              {categories.map((tag) => (
+                <span
+                  key={tag}
+                  className="font-mono text-[11px] uppercase tracking-wide text-muted border border-border rounded px-1.5 py-0.5"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

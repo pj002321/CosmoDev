@@ -17,4 +17,11 @@ await sql`
   )
 `;
 
+await sql`
+  CREATE TABLE IF NOT EXISTS profiles (
+    author_id text PRIMARY KEY,
+    tagline text NOT NULL
+  )
+`;
+
 console.log("migrated");

@@ -14,7 +14,7 @@ export default async function EditPostPage({
   if (!post || post.authorId !== userId) notFound();
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-12">
+    <div className="mx-auto max-w-6xl px-6 py-12">
       <p className="font-mono text-xs text-muted mb-2">▸ EDIT POST</p>
       <h1 className="text-2xl font-semibold mb-8">글 수정</h1>
       <PostForm

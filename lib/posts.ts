@@ -1,7 +1,5 @@
-import { remark } from "remark";
-import remarkGfm from "remark-gfm";
-import html from "remark-html";
 import { sql } from "@/lib/db";
+import { renderMarkdown } from "@/lib/markdown";
 
 export type PostMeta = {
   slug: string;
@@ -81,11 +79,10 @@ export async function getPost(slug: string) {
   `) as Row[];
   const row = rows[0];
   if (!row) return null;
-  const processed = await remark().use(remarkGfm).use(html).process(row.content ?? "");
   return {
     ...toMeta(row),
     content: row.content ?? "",
-    contentHtml: processed.toString(),
+    contentHtml: await renderMarkdown(row.content ?? ""),
   };
 }
 

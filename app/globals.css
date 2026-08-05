@@ -260,6 +260,7 @@ body {
 }
 
 .prose-post pre {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
@@ -272,6 +273,72 @@ body {
   background: none;
   border: none;
   padding: 0;
+}
+
+.prose-post pre[data-lang] {
+  padding-top: 2.25rem;
+}
+
+.prose-post pre[data-lang]::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 0.3rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+  color: var(--accent);
+}
+
+.hljs-string,
+.hljs-name,
+.hljs-attr,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+  color: #e0a96d;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion,
+.hljs-meta {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type {
+  color: #7dd3fc;
+}
+
+.hljs-title,
+.hljs-attribute {
+  color: #e4e4e7;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 700;
 }
 
 .prose-post blockquote {

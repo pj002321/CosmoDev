@@ -16,9 +16,11 @@
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "rehype-highlight": "^7.0.2",
+    "rehype-stringify": "^10.0.1",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
-    "remark-html": "^16.0.1"
+    "remark-rehype": "^11.1.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

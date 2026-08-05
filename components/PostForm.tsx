@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 type Initial = {
@@ -27,7 +27,22 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [previewHtml, setPreviewHtml] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetch("/api/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      })
+        .then((res) => res.json())
+        .then((data) => setPreviewHtml(data.html ?? ""))
+        .catch(() => {});
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [content]);
 
   async function handleImageUpload(file: File) {
     setUploading(true);
@@ -141,15 +156,23 @@ export default function PostForm({ mode, slug, initial }: Props) {
         <span className="font-mono text-xs text-muted">커서 위치에 마크다운으로 삽입됩니다</span>
       </div>
 
-      <textarea
-        ref={textareaRef}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="마크다운으로 작성하세요"
-        required
-        rows={20}
-        className="bg-surface border border-border rounded px-3 py-2 font-mono text-sm leading-relaxed outline-none focus:border-accent"
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <textarea
+          ref={textareaRef}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="마크다운으로 작성하세요"
+          required
+          className="bg-surface border border-border rounded px-3 py-2 font-mono text-sm leading-relaxed outline-none focus:border-accent h-[36rem] resize-none"
+        />
+        <div className="border border-border rounded px-4 py-3 h-[36rem] overflow-y-auto">
+          {previewHtml ? (
+            <div className="prose-post" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+          ) : (
+            <p className="font-mono text-xs text-muted">미리보기가 여기에 표시됩니다</p>
+          )}
+        </div>
+      </div>
 
       <button
         type="submit"

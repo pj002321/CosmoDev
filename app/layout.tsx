@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider, Show, UserButton } from "@clerk/nextjs";
+import { ClerkProvider, Show, SignOutButton, UserButton } from "@clerk/nextjs";
+import { LogoutIcon, ListIcon, PencilIcon } from "@/components/icons";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,37 +43,52 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         >
           <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
-            <div className="mx-auto max-w-3xl px-6 py-5 flex items-center justify-between">
-              <Link href="/" className="font-mono text-sm tracking-wide">
-                <span className="text-accent glow-text">▸</span> DEVShot
+            <div className="mx-auto max-w-4xl px-6 py-4 flex items-center justify-between">
+              <Link href="/" className="flex items-center gap-2.5 font-mono text-sm tracking-wide">
+                <span className="flex gap-1">
+                  <span className="term-dot" />
+                  <span className="term-dot" />
+                  <span className="term-dot accent" />
+                </span>
+                DEVShot
               </Link>
-              <div className="flex items-center gap-4">
-                <span className="font-mono text-xs text-muted">개인 개발 일지</span>
+              <div className="flex items-center gap-1.5">
                 <Show when="signed-in">
                   <Link
                     href="/write"
-                    className="font-mono text-xs text-muted hover:text-accent"
+                    className="flex items-center gap-1.5 font-mono text-xs text-muted hover:text-accent px-2.5 py-1.5 rounded hover:bg-surface transition-colors"
                   >
+                    <PencilIcon className="w-3.5 h-3.5" />
                     글쓰기
                   </Link>
                   <Link
                     href="/my-posts"
-                    className="font-mono text-xs text-muted hover:text-accent"
+                    className="flex items-center gap-1.5 font-mono text-xs text-muted hover:text-accent px-2.5 py-1.5 rounded hover:bg-surface transition-colors"
                   >
+                    <ListIcon className="w-3.5 h-3.5" />
                     내 글
                   </Link>
-                  <UserButton />
+                  <SignOutButton redirectUrl="/">
+                    <button className="flex items-center gap-1.5 font-mono text-xs text-muted hover:text-accent px-2.5 py-1.5 rounded hover:bg-surface transition-colors cursor-pointer">
+                      <LogoutIcon className="w-3.5 h-3.5" />
+                      로그아웃
+                    </button>
+                  </SignOutButton>
+                  <span className="ml-1 border-l border-border pl-3">
+                    <UserButton />
+                  </span>
                 </Show>
                 <Show when="signed-out">
+                  <span className="font-mono text-xs text-muted mr-2">개인 개발 일지</span>
                   <Link
                     href="/sign-in"
-                    className="font-mono text-xs text-muted hover:text-accent"
+                    className="font-mono text-xs text-muted hover:text-accent px-2.5 py-1.5 rounded hover:bg-surface transition-colors"
                   >
                     로그인
                   </Link>
                   <Link
                     href="/sign-up"
-                    className="font-mono text-xs text-muted hover:text-accent"
+                    className="btn-accent font-mono text-xs rounded px-3 py-1.5"
                   >
                     회원가입
                   </Link>

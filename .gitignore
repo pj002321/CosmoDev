@@ -44,3 +44,9 @@ next-env.d.ts
 # claude code
 .claude/
 .env*
+
+# graphify
+.agents/
+.serena/
+graphify-out/
+skills-lock.json

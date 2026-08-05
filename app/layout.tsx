@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider, Show, SignOutButton, UserButton } from "@clerk/nextjs";
-import { LogoutIcon, ListIcon, PencilIcon } from "@/components/icons";
+import { GraphIcon, LogoutIcon, ListIcon, PencilIcon } from "@/components/icons";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -67,6 +67,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                   >
                     <ListIcon className="w-3.5 h-3.5" />
                     내 글
+                  </Link>
+                  <Link
+                    href="/graph"
+                    className="flex items-center gap-1.5 font-mono text-xs text-muted hover:text-accent px-2.5 py-1.5 rounded hover:bg-surface transition-colors"
+                  >
+                    <GraphIcon className="w-3.5 h-3.5" />
+                    그래프
                   </Link>
                   <SignOutButton redirectUrl="/">
                     <button className="flex items-center gap-1.5 font-mono text-xs text-muted hover:text-accent px-2.5 py-1.5 rounded hover:bg-surface transition-colors cursor-pointer">

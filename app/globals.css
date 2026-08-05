@@ -41,22 +41,32 @@ body {
   animation: fade-in 0.4s ease-out both;
 }
 
-/* continuous, independent of the entrance fade so it keeps going forever */
+/* continuous, independent of the entrance fade so it keeps going forever;
+   drifts on both axes with a slight tilt for a "floating" feel rather than
+   a plain up-down bob */
 @keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(3px, -10px) rotate(0.6deg);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translate(-2px, -4px) rotate(-0.5deg);
+  }
+  75% {
+    transform: translate(-4px, -12px) rotate(0.4deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
   }
 }
 
 .post-card {
   /* per-card stagger (set inline via animation-delay) offsets both the
      one-shot entrance and the infinite float's phase, so cards keep
-     bobbing slightly out of sync instead of moving in lockstep */
-  animation: fade-in 0.4s ease-out both, float 5s ease-in-out infinite;
+     drifting slightly out of sync instead of moving in lockstep */
+  animation: fade-in 0.4s ease-out both, float 7s ease-in-out infinite;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   position: relative;
   overflow: hidden;

@@ -22,6 +22,17 @@ export function LogoutIcon({ className }: { className?: string }) {
   );
 }
 
+export function GraphIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
+      <circle cx="4.5" cy="5" r="2" />
+      <circle cx="15.5" cy="5" r="2" />
+      <circle cx="10" cy="15" r="2" />
+      <path d="M6.3 6l2.2 6.5M13.7 6l-2.2 6.5M6.5 5h7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function UserIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>

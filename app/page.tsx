@@ -21,7 +21,7 @@ export default async function Home() {
             $ whoami<span className="cursor-blink" />
           </p>
           <h1 className="text-3xl font-semibold mb-3 animate-fade-in glow-text">
-            로그인하고 내 글을 확인하세요
+            오늘 생각을 정리해보세요
           </h1>
           <p className="text-sm text-muted mb-8">
             친구나 이웃의 글은 그 사람의 프로필 링크로 볼 수 있어요.

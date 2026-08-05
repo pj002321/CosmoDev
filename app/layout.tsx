@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "devlog",
+  title: "DEVShot",
   description: "개인 개발 일지",
 };
 
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <header className="border-b border-border">
           <div className="mx-auto max-w-3xl px-6 py-5 flex items-center justify-between">
             <Link href="/" className="font-mono text-sm tracking-wide">
-              <span className="text-accent">▸</span> DEVLOG
+              <span className="text-accent">▸</span> DEVShot
             </Link>
             <div className="flex items-center gap-4">
               <span className="font-mono text-xs text-muted">개인 개발 일지</span>

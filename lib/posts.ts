@@ -1,8 +1,7 @@
-import { put, list, del } from "@vercel/blob";
-import matter from "gray-matter";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import html from "remark-html";
+import { sql } from "@/lib/db";
 
 export type PostMeta = {
   slug: string;
@@ -10,6 +9,8 @@ export type PostMeta = {
   date: string;
   summary: string;
   tags: string[];
+  authorId: string;
+  authorName: string;
 };
 
 export type PostInput = {
@@ -20,65 +21,27 @@ export type PostInput = {
   content: string;
 };
 
-function toDateString(date: unknown): string {
-  return date instanceof Date ? date.toISOString().slice(0, 10) : String(date);
-}
+type Row = {
+  slug: string;
+  title: string;
+  date: string;
+  summary: string;
+  tags: string[];
+  author_id: string;
+  author_name: string;
+  content?: string;
+};
 
-function pathnameFor(slug: string) {
-  return `posts/${slug}.md`;
-}
-
-async function findBlob(slug: string) {
-  const { blobs } = await list({ prefix: pathnameFor(slug), limit: 1 });
-  return blobs.find((b) => b.pathname === pathnameFor(slug)) ?? null;
-}
-
-export async function getAllPosts(): Promise<PostMeta[]> {
-  const { blobs } = await list({ prefix: "posts/" });
-  const posts = await Promise.all(
-    blobs.map(async (blob) => {
-      const raw = await (await fetch(blob.url, { cache: "no-store" })).text();
-      const { data } = matter(raw);
-      return {
-        slug: blob.pathname.replace(/^posts\//, "").replace(/\.md$/, ""),
-        title: data.title as string,
-        date: toDateString(data.date),
-        summary: (data.summary as string) ?? "",
-        tags: (data.tags as string[]) ?? [],
-      };
-    })
-  );
-  return posts.sort((a, b) => (a.date < b.date ? 1 : -1));
-}
-
-export async function getPost(slug: string) {
-  const blob = await findBlob(slug);
-  if (!blob) return null;
-  const raw = await (await fetch(blob.url, { cache: "no-store" })).text();
-  const { data, content } = matter(raw);
-  const processed = await remark().use(remarkGfm).use(html).process(content);
+function toMeta(row: Row): PostMeta {
   return {
-    slug,
-    title: data.title as string,
-    date: toDateString(data.date),
-    summary: (data.summary as string) ?? "",
-    tags: (data.tags as string[]) ?? [],
-    content,
-    contentHtml: processed.toString(),
+    slug: row.slug,
+    title: row.title,
+    date: row.date,
+    summary: row.summary,
+    tags: row.tags,
+    authorId: row.author_id,
+    authorName: row.author_name,
   };
-}
-
-function toMarkdown(input: PostInput): string {
-  return [
-    "---",
-    `title: ${JSON.stringify(input.title)}`,
-    `date: ${input.date}`,
-    `summary: ${JSON.stringify(input.summary)}`,
-    `tags: [${input.tags.map((t) => JSON.stringify(t)).join(", ")}]`,
-    "---",
-    "",
-    input.content,
-  ].join("\n");
 }
 
 export function slugify(title: string, date: string): string {
@@ -91,15 +54,59 @@ export function slugify(title: string, date: string): string {
   return base ? `${date}-${base}-${id}` : `${date}-${id}`;
 }
 
-export async function savePost(slug: string, input: PostInput) {
-  await put(pathnameFor(slug), toMarkdown(input), {
-    access: "public",
-    contentType: "text/markdown",
-    allowOverwrite: true,
-  });
+export async function getAllPosts(): Promise<PostMeta[]> {
+  const rows = (await sql()`
+    SELECT slug, title, date, summary, tags, author_id, author_name
+    FROM posts ORDER BY date DESC, created_at DESC
+  `) as Row[];
+  return rows.map(toMeta);
 }
 
-export async function deletePost(slug: string) {
-  const blob = await findBlob(slug);
-  if (blob) await del(blob.url);
+export async function getPostsByAuthor(authorId: string): Promise<PostMeta[]> {
+  const rows = (await sql()`
+    SELECT slug, title, date, summary, tags, author_id, author_name
+    FROM posts WHERE author_id = ${authorId} ORDER BY date DESC, created_at DESC
+  `) as Row[];
+  return rows.map(toMeta);
+}
+
+export async function getPost(slug: string) {
+  const rows = (await sql()`
+    SELECT slug, title, date, summary, tags, author_id, author_name, content
+    FROM posts WHERE slug = ${slug} LIMIT 1
+  `) as Row[];
+  const row = rows[0];
+  if (!row) return null;
+  const processed = await remark().use(remarkGfm).use(html).process(row.content ?? "");
+  return {
+    ...toMeta(row),
+    content: row.content ?? "",
+    contentHtml: processed.toString(),
+  };
+}
+
+export async function createPost(input: PostInput, authorId: string, authorName: string) {
+  const slug = slugify(input.title, input.date);
+  await sql()`
+    INSERT INTO posts (slug, title, date, summary, tags, content, author_id, author_name)
+    VALUES (${slug}, ${input.title}, ${input.date}, ${input.summary}, ${input.tags}, ${input.content}, ${authorId}, ${authorName})
+  `;
+  return slug;
+}
+
+export async function updatePost(slug: string, input: PostInput, authorId: string) {
+  const rows = (await sql()`
+    UPDATE posts SET title = ${input.title}, date = ${input.date}, summary = ${input.summary},
+      tags = ${input.tags}, content = ${input.content}
+    WHERE slug = ${slug} AND author_id = ${authorId}
+    RETURNING slug
+  `) as { slug: string }[];
+  return rows.length > 0;
+}
+
+export async function deletePost(slug: string, authorId: string) {
+  const rows = (await sql()`
+    DELETE FROM posts WHERE slug = ${slug} AND author_id = ${authorId} RETURNING slug
+  `) as { slug: string }[];
+  return rows.length > 0;
 }

@@ -21,7 +21,9 @@
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0) 0 0 / 28px 28px,
+    var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
@@ -55,11 +57,43 @@ body {
      one-shot entrance and the infinite float's phase, so cards keep
      bobbing slightly out of sync instead of moving in lockstep */
   animation: fade-in 0.4s ease-out both, float 5s ease-in-out infinite;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.post-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .post-card:hover {
-  box-shadow: 0 8px 24px -12px color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--accent) 55%, transparent);
+  transform: translateY(-2px) scale(1.01);
+}
+
+.post-card:hover::before {
+  opacity: 1;
+}
+
+.glow-text {
+  text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: var(--background);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-accent:hover {
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 60%, transparent);
+  transform: translateY(-1px);
 }
 
 .prose-post {

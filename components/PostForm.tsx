@@ -35,7 +35,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
     try {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+      const res = await fetch("/api/upload", { method: "POST", body: form });
       if (!res.ok) throw new Error("upload failed");
       const { url } = await res.json();
       const insertion = `![${file.name}](${url})\n`;
@@ -72,7 +72,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
         content,
       };
       const res = await fetch(
-        mode === "new" ? "/api/admin/posts" : `/api/admin/posts/${slug}`,
+        mode === "new" ? "/api/posts" : `/api/posts/${slug}`,
         {
           method: mode === "new" ? "POST" : "PUT",
           headers: { "Content-Type": "application/json" },
@@ -80,7 +80,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
         }
       );
       if (!res.ok) throw new Error("save failed");
-      router.push("/admin");
+      router.push("/my-posts");
       router.refresh();
     } catch {
       setError("저장에 실패했습니다.");
@@ -154,7 +154,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
       <button
         type="submit"
         disabled={saving}
-        className="self-start bg-accent text-background font-medium rounded px-4 py-2 hover:opacity-90 disabled:opacity-50"
+        className="btn-accent self-start font-medium rounded px-4 py-2 disabled:opacity-50"
       >
         {saving ? "저장 중…" : mode === "new" ? "발행" : "수정 저장"}
       </button>

@@ -3,14 +3,21 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function DeletePostButton({ slug }: { slug: string }) {
+export default function DeletePostButton({
+  slug,
+  redirectTo,
+}: {
+  slug: string;
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
 
   async function handleDelete() {
     if (!confirm("이 글을 삭제할까요?")) return;
     setDeleting(true);
-    await fetch(`/api/admin/posts/${slug}`, { method: "DELETE" });
+    await fetch(`/api/posts/${slug}`, { method: "DELETE" });
+    if (redirectTo) router.push(redirectTo);
     router.refresh();
   }
 

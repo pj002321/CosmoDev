@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import { getPost } from "@/lib/posts";
 import PostForm from "@/components/PostForm";
 
@@ -8,8 +9,9 @@ export default async function EditPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const { userId } = await auth();
   const post = await getPost(slug);
-  if (!post) notFound();
+  if (!post || post.authorId !== userId) notFound();
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">

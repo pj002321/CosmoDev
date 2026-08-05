@@ -1,15 +1,56 @@
 import Link from "next/link";
-import { getAllPosts } from "@/lib/posts";
+import { auth } from "@clerk/nextjs/server";
+import { getPostsByAuthor } from "@/lib/posts";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const posts = await getAllPosts();
+  const { userId } = await auth();
+
+  if (!userId) {
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-24 text-center">
+        <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ DEVShot</p>
+        <h1 className="text-3xl font-semibold mb-3 animate-fade-in glow-text">
+          로그인하고 내 글을 확인하세요
+        </h1>
+        <p className="text-sm text-muted mb-8">
+          친구나 이웃의 글은 그 사람의 프로필 링크로 볼 수 있어요.
+        </p>
+        <div className="flex items-center justify-center gap-3">
+          <Link
+            href="/sign-in"
+            className="font-mono text-xs border border-border rounded px-3 py-2 hover:border-accent"
+          >
+            로그인
+          </Link>
+          <Link
+            href="/sign-up"
+            className="btn-accent font-mono text-xs rounded px-3 py-2"
+          >
+            회원가입
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const posts = await getPostsByAuthor(userId);
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
-      <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ ARCHIVE</p>
-      <h1 className="text-2xl font-semibold mb-10 animate-fade-in">모든 글</h1>
+      <div className="flex items-center justify-between mb-10">
+        <div>
+          <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ MY ARCHIVE</p>
+          <h1 className="text-2xl font-semibold animate-fade-in">내가 쓴 글</h1>
+        </div>
+        <Link
+          href="/write"
+          className="font-mono text-xs border border-border rounded px-3 py-2 hover:border-accent"
+        >
+          + 새 글
+        </Link>
+      </div>
 
       <div className="flex flex-col gap-4">
         {posts.map((post, i) => (
@@ -38,6 +79,9 @@ export default async function Home() {
             <p className="text-sm text-muted">{post.summary}</p>
           </Link>
         ))}
+        {posts.length === 0 && (
+          <p className="text-sm text-muted">아직 작성된 글이 없습니다.</p>
+        )}
       </div>
     </div>
   );

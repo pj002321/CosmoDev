@@ -1,28 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifySessionToken } from "@/lib/auth";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+
+const isProtectedRoute = createRouteMatcher([
+  "/write(.*)",
+  "/api/posts(.*)",
+  "/api/upload",
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) {
+    const { userId } = await auth();
+    if (!userId) {
+      if (req.nextUrl.pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+      }
+      const url = req.nextUrl.clone();
+      url.pathname = "/sign-in";
+      return NextResponse.redirect(url);
+    }
+  }
+});
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"],
+  matcher: ["/((?!_next|.*\\..*).*)", "/(api|trpc)(.*)"],
 };
-
-export async function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  if (pathname === "/admin/login" || pathname === "/api/admin/login") {
-    return NextResponse.next();
-  }
-
-  const secret = process.env.SESSION_SECRET;
-  const token = req.cookies.get("devlog_session")?.value;
-  const valid = Boolean(secret) && (await verifySessionToken(token, secret!));
-
-  if (!valid) {
-    if (pathname.startsWith("/api/admin")) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    }
-    const url = req.nextUrl.clone();
-    url.pathname = "/admin/login";
-    return NextResponse.redirect(url);
-  }
-
-  return NextResponse.next();
-}

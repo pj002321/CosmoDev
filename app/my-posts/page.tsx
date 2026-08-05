@@ -1,29 +1,30 @@
 import Link from "next/link";
-import { getAllPosts } from "@/lib/posts";
-import LogoutButton from "@/components/LogoutButton";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { getPostsByAuthor } from "@/lib/posts";
 import DeletePostButton from "@/components/DeletePostButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
-  const posts = await getAllPosts();
+export default async function MyPostsPage() {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const posts = await getPostsByAuthor(userId);
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <p className="font-mono text-xs text-muted mb-2">▸ ADMIN</p>
-          <h1 className="text-2xl font-semibold">글 관리</h1>
+          <p className="font-mono text-xs text-muted mb-2">▸ MY POSTS</p>
+          <h1 className="text-2xl font-semibold">내 글 관리</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/posts/new"
-            className="font-mono text-xs border border-border rounded px-3 py-2 hover:border-accent"
-          >
-            + 새 글
-          </Link>
-          <LogoutButton />
-        </div>
+        <Link
+          href="/write"
+          className="font-mono text-xs border border-border rounded px-3 py-2 hover:border-accent"
+        >
+          + 새 글
+        </Link>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -38,7 +39,7 @@ export default async function AdminPage() {
             </div>
             <div className="flex gap-2">
               <Link
-                href={`/admin/posts/${post.slug}/edit`}
+                href={`/write/${post.slug}/edit`}
                 className="font-mono text-xs border border-border rounded px-2 py-1 hover:border-accent"
               >
                 수정
@@ -48,7 +49,7 @@ export default async function AdminPage() {
           </div>
         ))}
         {posts.length === 0 && (
-          <p className="text-sm text-muted">아직 글이 없습니다.</p>
+          <p className="text-sm text-muted">아직 작성한 글이 없습니다.</p>
         )}
       </div>
     </div>

@@ -1,8 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useRouter } from "next/navigation";
-import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide } from "d3-force";
+import {
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  forceCollide,
+  type Simulation,
+} from "d3-force";
 import type { SimulationNodeDatum } from "d3-force";
 
 type Post = { slug: string; title: string; tags: string[] };
@@ -14,11 +21,11 @@ type Node = SimulationNodeDatum & {
   slug?: string;
 };
 
-type Link = { source: string; target: string };
+type Link = { source: string | Node; target: string | Node };
 
 const UNCATEGORIZED = "미분류";
 
-function layout(posts: Post[]) {
+function buildGraph(posts: Post[]) {
   const tagIds = new Set<string>();
   const nodes: Node[] = [];
   const links: Link[] = [];
@@ -36,58 +43,111 @@ function layout(posts: Post[]) {
     nodes.push({ id: post.slug, label: post.title, kind: "post", slug: post.slug });
   }
 
-  const sim = forceSimulation(nodes)
-    .force(
-      "link",
-      forceLink<Node, Link>(links)
-        .id((n) => n.id)
-        .distance(60)
-    )
-    .force("charge", forceManyBody().strength(-160))
-    .force("center", forceCenter(0, 0))
-    .force("collide", forceCollide<Node>((n) => (n.kind === "tag" ? 34 : 20)))
-    .stop();
+  return { nodes, links };
+}
 
-  for (let i = 0; i < 300; i++) sim.tick();
-
-  const xs = nodes.map((n) => n.x ?? 0);
-  const ys = nodes.map((n) => n.y ?? 0);
-  const pad = 60;
-  const minX = Math.min(...xs) - pad;
-  const maxX = Math.max(...xs) + pad;
-  const minY = Math.min(...ys) - pad;
-  const maxY = Math.max(...ys) + pad;
-
-  return { nodes, links, viewBox: `${minX} ${minY} ${maxX - minX} ${maxY - minY}` };
+function nodeId(end: string | Node) {
+  return typeof end === "string" ? end : end.id;
 }
 
 export default function PostGraph({ posts }: { posts: Post[] }) {
   const router = useRouter();
-  const { nodes, links, viewBox } = useMemo(() => layout(posts), [posts]);
+  const { nodes, links } = useMemo(() => buildGraph(posts), [posts]);
+  const [, bump] = useState(0);
   const [hovered, setHovered] = useState<string | null>(null);
+  const simRef = useRef<Simulation<Node, Link> | null>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const dragNode = useRef<Node | null>(null);
+
+  const size = Math.max(320, Math.sqrt(nodes.length) * 85);
+
+  useEffect(() => {
+    if (nodes.length === 0) return;
+    const sim = forceSimulation(nodes)
+      .force(
+        "link",
+        forceLink<Node, Link>(links)
+          .id((n) => n.id)
+          .distance(46)
+          .strength(0.6)
+      )
+      .force("charge", forceManyBody().strength(-120))
+      .force("center", forceCenter(0, 0))
+      .force("collide", forceCollide<Node>((n) => (n.kind === "tag" ? 20 : 12)))
+      .on("tick", () => bump((t) => t + 1));
+    simRef.current = sim;
+    return () => {
+      sim.stop();
+      simRef.current = null;
+    };
+  }, [nodes, links]);
 
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
   const neighbors = useMemo(() => {
     if (!hovered) return null;
     const set = new Set<string>([hovered]);
     for (const l of links) {
-      const s = typeof l.source === "string" ? l.source : (l.source as Node).id;
-      const t = typeof l.target === "string" ? l.target : (l.target as Node).id;
+      const s = nodeId(l.source);
+      const t = nodeId(l.target);
       if (s === hovered) set.add(t);
       if (t === hovered) set.add(s);
     }
     return set;
   }, [hovered, links]);
 
+  function toSvgPoint(e: ReactPointerEvent) {
+    const svg = svgRef.current;
+    const ctm = svg?.getScreenCTM();
+    if (!svg || !ctm) return { x: 0, y: 0 };
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const p = pt.matrixTransform(ctm.inverse());
+    return { x: p.x, y: p.y };
+  }
+
+  function handlePointerDown(n: Node, e: ReactPointerEvent) {
+    e.stopPropagation();
+    dragNode.current = n;
+    simRef.current?.alphaTarget(0.3).restart();
+    const { x, y } = toSvgPoint(e);
+    n.fx = x;
+    n.fy = y;
+  }
+
+  function handlePointerMove(e: ReactPointerEvent) {
+    const n = dragNode.current;
+    if (!n) return;
+    const { x, y } = toSvgPoint(e);
+    n.fx = x;
+    n.fy = y;
+  }
+
+  function endDrag() {
+    if (dragNode.current) {
+      dragNode.current.fx = null;
+      dragNode.current.fy = null;
+      dragNode.current = null;
+    }
+    simRef.current?.alphaTarget(0);
+  }
+
   if (posts.length === 0) {
     return <p className="text-sm text-muted">아직 작성된 글이 없습니다.</p>;
   }
 
   return (
-    <svg viewBox={viewBox} className="w-full h-[70vh] border border-border rounded-lg bg-surface">
+    <svg
+      ref={svgRef}
+      viewBox={`${-size / 2} ${-size / 2} ${size} ${size}`}
+      className="w-full h-[70vh] border border-border rounded-lg bg-surface touch-none select-none"
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerLeave={endDrag}
+    >
       {links.map((l, i) => {
-        const s = byId.get(typeof l.source === "string" ? l.source : (l.source as Node).id);
-        const t = byId.get(typeof l.target === "string" ? l.target : (l.target as Node).id);
+        const s = byId.get(nodeId(l.source));
+        const t = byId.get(nodeId(l.target));
         if (!s || !t) return null;
         const dim = neighbors && (!neighbors.has(s.id) || !neighbors.has(t.id));
         return (
@@ -98,7 +158,8 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
             x2={t.x}
             y2={t.y}
             stroke="var(--border)"
-            strokeOpacity={dim ? 0.15 : 0.6}
+            strokeWidth={0.75}
+            strokeOpacity={dim ? 0.1 : 0.5}
           />
         );
       })}
@@ -109,26 +170,27 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
           <g
             key={n.id}
             transform={`translate(${n.x},${n.y})`}
-            opacity={dim ? 0.25 : 1}
+            opacity={dim ? 0.2 : 1}
             onMouseEnter={() => setHovered(n.id)}
             onMouseLeave={() => setHovered(null)}
+            onPointerDown={(e) => handlePointerDown(n, e)}
             onClick={() => n.slug && router.push(`/posts/${n.slug}`)}
-            className={n.slug ? "cursor-pointer" : ""}
+            className={n.slug ? "cursor-pointer" : "cursor-grab"}
           >
             <circle
-              r={isTag ? 9 : 5}
+              r={isTag ? 5.5 : 3}
               fill={isTag ? "var(--accent)" : "var(--surface)"}
               stroke={isTag ? "none" : "var(--muted)"}
-              strokeWidth={isTag ? 0 : 1.5}
+              strokeWidth={isTag ? 0 : 1}
             />
             <text
-              x={isTag ? 13 : 9}
-              y={4}
-              fontSize={isTag ? 12 : 10.5}
+              x={isTag ? 8 : 5.5}
+              y={2.8}
+              fontSize={isTag ? 8 : 7}
               fontFamily="var(--font-mono)"
-              fill={isTag ? "var(--accent)" : "var(--foreground)"}
+              fill={isTag ? "var(--accent)" : "var(--muted)"}
             >
-              {isTag ? n.label : n.label.length > 18 ? `${n.label.slice(0, 18)}…` : n.label}
+              {isTag ? n.label : n.label.length > 16 ? `${n.label.slice(0, 16)}…` : n.label}
             </text>
           </g>
         );

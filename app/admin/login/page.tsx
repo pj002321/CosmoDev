@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -18,13 +17,15 @@ export default function LoginPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
     });
-    setLoading(false);
     if (!res.ok) {
+      setLoading(false);
       setError("비밀번호가 틀렸습니다.");
       return;
     }
-    router.push("/admin");
-    router.refresh();
+    setSuccess(true);
+    // full page navigation, not router.push: avoids serving a stale
+    // pre-login RSC cache for /admin
+    window.location.href = "/admin";
   }
 
   return (
@@ -41,6 +42,7 @@ export default function LoginPage() {
           className="bg-surface border border-border rounded px-3 py-2 outline-none focus:border-accent"
         />
         {error && <p className="text-sm text-red-400">{error}</p>}
+        {success && <p className="text-sm text-accent">로그인 성공, 이동 중…</p>}
         <button
           type="submit"
           disabled={loading}

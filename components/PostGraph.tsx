@@ -59,7 +59,9 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragNode = useRef<Node | null>(null);
 
-  const size = Math.max(320, Math.sqrt(nodes.length) * 85);
+  const clusterSize = Math.max(320, Math.sqrt(nodes.length) * 85);
+  const viewW = clusterSize * 2.2;
+  const viewH = clusterSize * 1.3;
 
   useEffect(() => {
     if (nodes.length === 0) return;
@@ -139,8 +141,8 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
   return (
     <svg
       ref={svgRef}
-      viewBox={`${-size / 2} ${-size / 2} ${size} ${size}`}
-      className="w-full h-[70vh] border border-border rounded-lg bg-surface touch-none select-none"
+      viewBox={`${-viewW / 2} ${-viewH / 2} ${viewW} ${viewH}`}
+      className="w-full h-[85vh] touch-none select-none"
       onPointerMove={handlePointerMove}
       onPointerUp={endDrag}
       onPointerLeave={endDrag}

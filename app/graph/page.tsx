@@ -12,7 +12,7 @@ export default async function GraphPage() {
   const posts = await getPostsByAuthor(userId);
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12">
+    <div className="mx-auto max-w-[1600px] px-6 py-12">
       <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ GRAPH</p>
       <h1 className="text-2xl font-semibold mb-8 animate-fade-in">카테고리 그래프</h1>
       <PostGraph posts={posts.map((p) => ({ slug: p.slug, title: p.title, tags: p.tags }))} />

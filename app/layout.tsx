@@ -38,9 +38,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <span className="flare-star" style={{ left: "58%", top: "85%", animationDelay: "6.3s" }} />
           <span className="flare-star" style={{ left: "22%", top: "8%", animationDelay: "7.2s" }} />
           <span className="flare-star" style={{ left: "75%", top: "40%", animationDelay: "8.1s" }} />
-          <span className="shooting-star" style={{ left: "70%", top: "10%", animationDuration: "9s", animationDelay: "1s" }} />
-          <span className="shooting-star" style={{ left: "40%", top: "5%", animationDuration: "13s", animationDelay: "5s" }} />
-          <span className="shooting-star" style={{ left: "90%", top: "22%", animationDuration: "16s", animationDelay: "9s" }} />
+          <span className="shooting-star" style={{ left: "70%", top: "10%", animationDuration: "9s", animationDelay: "1s", "--len": "140px" } as React.CSSProperties} />
+          <span className="shooting-star" style={{ left: "40%", top: "5%", animationDuration: "13s", animationDelay: "5s", "--len": "70px" } as React.CSSProperties} />
+          <span className="shooting-star burst" style={{ left: "90%", top: "22%", animationDuration: "16s", animationDelay: "9s", "--len": "100px" } as React.CSSProperties} />
         </div>
         <ClerkProvider
           appearance={{

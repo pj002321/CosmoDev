@@ -44,6 +44,21 @@ export default function PostForm({ mode, slug, initial }: Props) {
     return () => clearTimeout(timer);
   }, [content]);
 
+  function handleTabKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key !== "Tab") return;
+    const el = e.currentTarget;
+    const start = el.selectionStart;
+    const fenceCount = (content.slice(0, start).match(/^```/gm) ?? []).length;
+    if (fenceCount % 2 === 0) return;
+    e.preventDefault();
+    const end = el.selectionEnd;
+    const next = content.slice(0, start) + "\t" + content.slice(end);
+    setContent(next);
+    requestAnimationFrame(() => {
+      el.selectionStart = el.selectionEnd = start + 1;
+    });
+  }
+
   async function handleImageUpload(file: File) {
     setUploading(true);
     setError("");
@@ -161,6 +176,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
           ref={textareaRef}
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          onKeyDown={handleTabKey}
           placeholder="마크다운으로 작성하세요"
           required
           className="bg-surface border border-border rounded px-3 py-2 font-mono text-sm leading-relaxed outline-none focus:border-accent h-[36rem] resize-none"

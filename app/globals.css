@@ -62,12 +62,16 @@ body {
 
 .shooting-star {
   position: absolute;
-  width: 110px;
+  width: var(--len, 110px);
   height: 2px;
   border-radius: 999px;
   background: linear-gradient(to bottom left, transparent, color-mix(in srgb, var(--foreground) 85%, transparent));
   opacity: 0;
   animation: shoot linear infinite;
+}
+
+.shooting-star.burst {
+  animation-name: shoot-burst;
 }
 
 @keyframes shoot {
@@ -85,6 +89,44 @@ body {
   100% {
     opacity: 0;
     transform: translate(-280px, 200px) rotate(-35deg);
+  }
+}
+
+@keyframes shoot-burst {
+  0%, 96% {
+    opacity: 0;
+    width: var(--len, 110px);
+    height: 2px;
+    border-radius: 999px;
+    box-shadow: none;
+    transform: translate(0, 0) rotate(-35deg) scale(1);
+  }
+  97% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(-35deg) scale(1);
+  }
+  98.3% {
+    opacity: 1;
+    width: var(--len, 110px);
+    height: 2px;
+    transform: translate(-140px, 100px) rotate(-35deg) scale(1);
+  }
+  98.6% {
+    opacity: 1;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--foreground);
+    box-shadow: 0 0 22px 8px color-mix(in srgb, var(--foreground) 70%, transparent);
+    transform: translate(-140px, 100px) rotate(0deg) scale(1.8);
+  }
+  100% {
+    opacity: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: none;
+    transform: translate(-140px, 100px) rotate(0deg) scale(0.4);
   }
 }
 
@@ -331,10 +373,13 @@ body {
 
 .hljs-comment,
 .hljs-quote,
-.hljs-deletion,
-.hljs-meta {
+.hljs-deletion {
   color: var(--muted);
   font-style: italic;
+}
+
+.hljs-meta {
+  color: var(--muted);
 }
 
 .hljs-number,

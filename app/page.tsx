@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getPostsByAuthor, uniqueTags } from "@/lib/posts";
 import { getTagline } from "@/lib/profiles";
 import EditableTagline from "@/components/EditableTagline";
+import PostFilter from "@/components/PostFilter";
 
 export const dynamic = "force-dynamic";
 
@@ -57,18 +58,6 @@ export default async function Home() {
         <div>
           <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ MY ARCHIVE</p>
           <EditableTagline initialValue={tagline} />
-          {categories.length > 0 && (
-            <div className="flex gap-1.5 mt-2 flex-wrap">
-              {categories.map((tag) => (
-                <span
-                  key={tag}
-                  className="font-mono text-[11px] uppercase tracking-wide text-muted border border-border rounded px-1.5 py-0.5"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
         <Link
           href="/write"
@@ -78,40 +67,7 @@ export default async function Home() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {posts.map((post, i) => (
-          <Link
-            key={post.slug}
-            href={`/posts/${post.slug}`}
-            style={{ animationDelay: `${i * 60}ms` }}
-            className="post-card group border border-border rounded-lg p-5 bg-surface hover:border-accent flex flex-col"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="card-index">{String(i + 1).padStart(2, "0")}</span>
-              <span className="font-mono text-xs text-muted">{post.date}</span>
-            </div>
-            <h2 className="text-lg font-medium mb-1 group-hover:text-accent transition-colors">
-              {post.title}
-            </h2>
-            <p className="text-sm text-muted flex-1">{post.summary}</p>
-            {post.tags.length > 0 && (
-              <div className="flex gap-1.5 mt-3 flex-wrap">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="font-mono text-[11px] uppercase tracking-wide text-muted border border-border rounded px-1.5 py-0.5"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </Link>
-        ))}
-        {posts.length === 0 && (
-          <p className="text-sm text-muted sm:col-span-2">아직 작성된 글이 없습니다.</p>
-        )}
-      </div>
+      <PostFilter posts={posts} categories={categories} allLabel="전체" emptyLabel="아직 작성된 글이 없습니다." />
     </div>
   );
 }

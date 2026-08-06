@@ -1,43 +1,43 @@
 export function PencilIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
-      <path d="M13.5 3.5l3 3L6 17l-4 1 1-4L13.5 3.5z" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M17 3l4 4L8 20l-5 1 1-5L17 3z" />
     </svg>
   );
 }
 
 export function ListIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
-      <path d="M7 5h10M7 10h10M7 15h10M3 5h.01M3 10h.01M3 15h.01" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={className}>
+      <path d="M4 6h16M4 12h16M4 18h10" />
     </svg>
   );
 }
 
 export function LogoutIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
-      <path d="M8 17H4.5A1.5 1.5 0 013 15.5v-11A1.5 1.5 0 014.5 3H8M13 14l4-4-4-4M17 10H7" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
     </svg>
   );
 }
 
 export function GraphIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
-      <circle cx="4.5" cy="5" r="2" />
-      <circle cx="15.5" cy="5" r="2" />
-      <circle cx="10" cy="15" r="2" />
-      <path d="M6.3 6l2.2 6.5M13.7 6l-2.2 6.5M6.5 5h7" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" className={className}>
+      <path d="M8 7.4L11 15M16 7.4L13 15M8.6 6h6.8" />
+      <circle cx="6" cy="6" r="2.5" fill="currentColor" stroke="none" />
+      <circle cx="18" cy="6" r="2.5" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="18" r="2.5" fill="currentColor" stroke="none" />
     </svg>
   );
 }
 
 export function UserIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
-      <circle cx="10" cy="6.5" r="3" />
-      <path d="M3.5 17c1.2-3.3 3.8-5 6.5-5s5.3 1.7 6.5 5" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6" />
     </svg>
   );
 }

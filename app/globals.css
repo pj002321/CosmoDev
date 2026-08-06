@@ -294,6 +294,24 @@ body {
   color: var(--accent);
 }
 
+.prose-post pre[data-lang="console"],
+.prose-post pre[data-lang="shell"] {
+  padding-top: 2.5rem;
+  background: var(--background);
+}
+
+.prose-post pre[data-lang="console"]::before,
+.prose-post pre[data-lang="shell"]::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  box-shadow: 16px 0 0 var(--border), 32px 0 0 var(--accent);
+  padding: 0;
+  border-bottom: none;
+}
+
 .hljs-keyword,
 .hljs-selector-tag,
 .hljs-literal,

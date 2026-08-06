@@ -41,6 +41,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <span className="shooting-star" style={{ left: "70%", top: "10%", animationDuration: "9s", animationDelay: "1s", "--len": "140px" } as React.CSSProperties} />
           <span className="shooting-star" style={{ left: "40%", top: "5%", animationDuration: "13s", animationDelay: "5s", "--len": "70px" } as React.CSSProperties} />
           <span className="shooting-star burst" style={{ left: "90%", top: "22%", animationDuration: "16s", animationDelay: "9s", "--len": "100px" } as React.CSSProperties} />
+          <span className="mini-planet" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s" } as React.CSSProperties} />
+          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "-26px", "--py": "-16px" } as React.CSSProperties} />
+          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "22px", "--py": "-20px" } as React.CSSProperties} />
+          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "30px", "--py": "12px" } as React.CSSProperties} />
+          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "-20px", "--py": "24px" } as React.CSSProperties} />
+          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "8px", "--py": "30px" } as React.CSSProperties} />
+          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "-32px", "--py": "-4px" } as React.CSSProperties} />
         </div>
         <ClerkProvider
           appearance={{

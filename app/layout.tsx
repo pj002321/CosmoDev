@@ -29,11 +29,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <div className="starfield" aria-hidden="true">
           <span className="flare-star" style={{ left: "12%", top: "18%", animationDelay: "0s" }} />
-          <span className="flare-star" style={{ left: "82%", top: "12%", animationDelay: "2.2s" }} />
-          <span className="flare-star" style={{ left: "30%", top: "55%", animationDelay: "4.4s" }} />
-          <span className="flare-star" style={{ left: "68%", top: "70%", animationDelay: "6.6s" }} />
-          <span className="flare-star" style={{ left: "48%", top: "32%", animationDelay: "8.8s" }} />
-          <span className="flare-star" style={{ left: "90%", top: "60%", animationDelay: "11s" }} />
+          <span className="flare-star" style={{ left: "82%", top: "12%", animationDelay: "0.9s" }} />
+          <span className="flare-star" style={{ left: "30%", top: "55%", animationDelay: "1.8s" }} />
+          <span className="flare-star" style={{ left: "68%", top: "70%", animationDelay: "2.7s" }} />
+          <span className="flare-star" style={{ left: "48%", top: "32%", animationDelay: "3.6s" }} />
+          <span className="flare-star" style={{ left: "90%", top: "60%", animationDelay: "4.5s" }} />
+          <span className="flare-star" style={{ left: "6%", top: "45%", animationDelay: "5.4s" }} />
+          <span className="flare-star" style={{ left: "58%", top: "85%", animationDelay: "6.3s" }} />
+          <span className="flare-star" style={{ left: "22%", top: "8%", animationDelay: "7.2s" }} />
+          <span className="flare-star" style={{ left: "75%", top: "40%", animationDelay: "8.1s" }} />
           <span className="shooting-star" style={{ left: "70%", top: "10%", animationDuration: "9s", animationDelay: "1s" }} />
           <span className="shooting-star" style={{ left: "40%", top: "5%", animationDuration: "13s", animationDelay: "5s" }} />
           <span className="shooting-star" style={{ left: "90%", top: "22%", animationDuration: "16s", animationDelay: "9s" }} />

@@ -22,7 +22,7 @@
 
 body {
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='168' height='168'%3E%3Ccircle cx='28' cy='28' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.04;0.3;0.04' dur='5.5s' begin='-3.57s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='84' cy='28' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.04;0.3;0.04' dur='7.2s' begin='-6.51s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='140' cy='28' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.04;0.3;0.04' dur='8.8s' begin='-2.62s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='28' cy='84' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.04;0.3;0.04' dur='6.4s' begin='-0.67s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='84' cy='84' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.04;0.3;0.04' dur='9.5s' begin='-2.17s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='140' cy='84' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.04;0.3;0.04' dur='7.8s' begin='-5.92s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='28' cy='140' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.04;0.3;0.04' dur='5.5s' begin='-1.07s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='84' cy='140' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.04;0.3;0.04' dur='7.2s' begin='-2.36s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='140' cy='140' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.04;0.3;0.04' dur='8.8s' begin='-7.06s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/svg%3E")
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='168' height='168'%3E%3Ccircle cx='28' cy='28' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.05;0.55;0.05' dur='5.5s' begin='-3.57s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='84' cy='28' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.05;0.55;0.05' dur='7.2s' begin='-6.51s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='140' cy='28' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.05;0.55;0.05' dur='8.8s' begin='-2.62s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='28' cy='84' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.05;0.55;0.05' dur='6.4s' begin='-0.67s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='84' cy='84' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.05;0.55;0.05' dur='9.5s' begin='-2.17s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='140' cy='84' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.05;0.55;0.05' dur='7.8s' begin='-5.92s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='28' cy='140' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.05;0.55;0.05' dur='5.5s' begin='-1.07s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='84' cy='140' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.05;0.55;0.05' dur='7.2s' begin='-2.36s' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='140' cy='140' r='1' fill='%23e4e4e7' opacity='0.06'%3E%3Canimate attributeName='opacity' values='0.05;0.55;0.05' dur='8.8s' begin='-7.06s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/svg%3E")
       0 0 / 168px 168px,
     var(--background);
   color: var(--foreground);
@@ -43,20 +43,20 @@ body {
   height: 2px;
   border-radius: 50%;
   background: var(--foreground);
-  opacity: 0.15;
-  animation: flare-pulse 13s ease-in-out infinite;
+  opacity: 0.2;
+  animation: flare-pulse 9s ease-in-out infinite;
 }
 
 @keyframes flare-pulse {
-  0%, 90%, 100% {
-    opacity: 0.15;
+  0%, 88%, 100% {
+    opacity: 0.2;
     box-shadow: none;
     transform: scale(1);
   }
-  95% {
+  94% {
     opacity: 1;
-    box-shadow: 0 0 14px 3px color-mix(in srgb, var(--foreground) 60%, transparent);
-    transform: scale(2.2);
+    box-shadow: 0 0 20px 5px color-mix(in srgb, var(--foreground) 70%, transparent);
+    transform: scale(2.6);
   }
 }
 

@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.6.5",
+    "@clerk/themes": "^2.4.57",
     "@neondatabase/serverless": "^1.1.0",
     "@vercel/blob": "^2.6.1",
     "d3-force": "^3.0.0",

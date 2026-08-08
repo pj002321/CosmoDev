@@ -24,4 +24,27 @@ await sql`
   )
 `;
 
+await sql`
+  CREATE TABLE IF NOT EXISTS likes (
+    post_slug text NOT NULL REFERENCES posts(slug) ON DELETE CASCADE,
+    user_id text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (post_slug, user_id)
+  )
+`;
+
+await sql`
+  ALTER TABLE posts ADD COLUMN IF NOT EXISTS views integer NOT NULL DEFAULT 0
+`;
+
+await sql`
+  CREATE TABLE IF NOT EXISTS follows (
+    follower_id text NOT NULL,
+    followee_id text NOT NULL,
+    followee_name text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (follower_id, followee_id)
+  )
+`;
+
 console.log("migrated");

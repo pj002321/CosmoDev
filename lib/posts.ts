@@ -9,6 +9,7 @@ export type PostMeta = {
   tags: string[];
   authorId: string;
   authorName: string;
+  views: number;
 };
 
 export type PostInput = {
@@ -27,6 +28,7 @@ type Row = {
   tags: string[];
   author_id: string;
   author_name: string;
+  views: number;
   content?: string;
 };
 
@@ -39,6 +41,7 @@ function toMeta(row: Row): PostMeta {
     tags: row.tags,
     authorId: row.author_id,
     authorName: row.author_name,
+    views: row.views,
   };
 }
 
@@ -58,7 +61,7 @@ export function uniqueTags(posts: { tags: string[] }[]): string[] {
 
 export async function getAllPosts(): Promise<PostMeta[]> {
   const rows = (await sql()`
-    SELECT slug, title, date, summary, tags, author_id, author_name
+    SELECT slug, title, date, summary, tags, author_id, author_name, views
     FROM posts ORDER BY date DESC, created_at DESC
   `) as Row[];
   return rows.map(toMeta);
@@ -66,7 +69,7 @@ export async function getAllPosts(): Promise<PostMeta[]> {
 
 export async function getPostsByAuthor(authorId: string): Promise<PostMeta[]> {
   const rows = (await sql()`
-    SELECT slug, title, date, summary, tags, author_id, author_name
+    SELECT slug, title, date, summary, tags, author_id, author_name, views
     FROM posts WHERE author_id = ${authorId} ORDER BY date DESC, created_at DESC
   `) as Row[];
   return rows.map(toMeta);
@@ -74,7 +77,7 @@ export async function getPostsByAuthor(authorId: string): Promise<PostMeta[]> {
 
 export async function getPost(slug: string) {
   const rows = (await sql()`
-    SELECT slug, title, date, summary, tags, author_id, author_name, content
+    SELECT slug, title, date, summary, tags, author_id, author_name, views, content
     FROM posts WHERE slug = ${slug} LIMIT 1
   `) as Row[];
   const row = rows[0];
@@ -84,6 +87,15 @@ export async function getPost(slug: string) {
     content: row.content ?? "",
     contentHtml: await renderMarkdown(row.content ?? ""),
   };
+}
+
+// ponytail: counts every page load, no dedup by viewer/session; switch to a
+// per-viewer/day check (cookie or table) if inflated counts become a problem.
+export async function incrementViews(slug: string): Promise<number> {
+  const rows = (await sql()`
+    UPDATE posts SET views = views + 1 WHERE slug = ${slug} RETURNING views
+  `) as { views: number }[];
+  return rows[0]?.views ?? 0;
 }
 
 export async function createPost(input: PostInput, authorId: string, authorName: string) {

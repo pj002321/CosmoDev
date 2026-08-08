@@ -1,14 +1,20 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { getPostsByAuthor, uniqueTags } from "@/lib/posts";
 import { getTagline } from "@/lib/profiles";
+import { getLikeCounts } from "@/lib/likes";
 import EditableTagline from "@/components/EditableTagline";
 import PostFilter from "@/components/PostFilter";
+import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const { userId } = await auth();
+  const cookieStore = await cookies();
+  const locale: Locale = cookieStore.get(LOCALE_COOKIE)?.value === "en" ? "en" : "ko";
+  const dict = getDict(locale).home;
 
   if (!userId) {
     return (
@@ -19,28 +25,28 @@ export default async function Home() {
           <span className="term-dot accent" />
           <span className="ml-2 font-mono text-[11px] text-muted">~/devshot</span>
         </div>
-        <div className="border border-border rounded-b-lg bg-surface px-8 py-16 text-center">
+        <div className="glass-panel border border-border rounded-b-lg px-8 py-16 text-center">
           <p className="font-mono text-xs text-muted mb-3 animate-fade-in">
-            $ whoami<span className="cursor-blink" />
+            $ {dict.whoami}<span className="cursor-blink" />
           </p>
           <h1 className="text-3xl font-semibold mb-3 animate-fade-in glow-text">
-            오늘 생각을 정리해보세요
+            {dict.heroTitle}
           </h1>
           <p className="text-sm text-muted mb-8">
-            친구나 이웃의 글은 그 사람의 프로필 링크로 볼 수 있어요.
+            {dict.heroDesc}
           </p>
           <div className="flex items-center justify-center gap-3">
             <Link
               href="/sign-in"
               className="font-mono text-xs border border-border rounded px-3 py-2 hover:border-accent"
             >
-              로그인
+              {getDict(locale).nav.login}
             </Link>
             <Link
               href="/sign-up"
               className="btn-accent font-mono text-xs rounded px-3 py-2"
             >
-              회원가입
+              {getDict(locale).nav.signup}
             </Link>
           </div>
         </div>
@@ -48,26 +54,28 @@ export default async function Home() {
     );
   }
 
-  const posts = await getPostsByAuthor(userId);
-  const tagline = (await getTagline(userId)) ?? "내가 쓴 글";
+  const rawPosts = await getPostsByAuthor(userId);
+  const likeCounts = await getLikeCounts(rawPosts.map((p) => p.slug));
+  const posts = rawPosts.map((p) => ({ ...p, likeCount: likeCounts[p.slug] ?? 0 }));
+  const tagline = (await getTagline(userId)) ?? dict.defaultTagline;
   const categories = uniqueTags(posts);
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
       <div className="flex items-center justify-between mb-10">
         <div>
-          <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ MY ARCHIVE</p>
+          <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ {dict.archive}</p>
           <EditableTagline initialValue={tagline} />
         </div>
         <Link
           href="/write"
           className="btn-accent font-mono text-xs rounded px-3 py-2"
         >
-          + 새 글
+          {dict.newPost}
         </Link>
       </div>
 
-      <PostFilter posts={posts} categories={categories} allLabel="전체" emptyLabel="아직 작성된 글이 없습니다." />
+      <PostFilter posts={posts} categories={categories} allLabel={dict.all} emptyLabel={dict.empty} />
     </div>
   );
 }

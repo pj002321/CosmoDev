@@ -161,7 +161,7 @@ body {
   height: var(--psize, 4px);
   border-radius: 50%;
   background: var(--foreground);
-  box-shadow: 0 0 12px 4px color-mix(in srgb, var(--accent) 75%, transparent);
+  box-shadow: 0 0 12px 4px color-mix(in srgb, var(--foreground) 75%, transparent);
   opacity: 0;
   animation: particle-burst linear infinite;
 }

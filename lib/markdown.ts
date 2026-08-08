@@ -9,7 +9,7 @@ export async function renderMarkdown(content: string): Promise<string> {
   const processed = await remark()
     .use(remarkGfm)
     .use(remarkRehype)
-    .use(rehypeHighlight, { detect: false, languages: all })
+    .use(rehypeHighlight, { detect: true, languages: all })
     .use(rehypeStringify)
     .process(content ?? "");
   return processed

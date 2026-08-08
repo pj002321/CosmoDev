@@ -29,6 +29,21 @@ type UnsplashPhoto = {
 };
 
 type SlashMenuState = { index: number; top: number; left: number; active: number };
+type LangMenuState = { index: number; top: number; left: number };
+
+const CODE_LANGS: { label: string; lang: string }[] = [
+  { label: "자동 감지", lang: "" },
+  { label: "JavaScript", lang: "js" },
+  { label: "TypeScript", lang: "ts" },
+  { label: "Python", lang: "python" },
+  { label: "Bash", lang: "bash" },
+  { label: "JSON", lang: "json" },
+  { label: "CSS", lang: "css" },
+  { label: "HTML", lang: "html" },
+  { label: "SQL", lang: "sql" },
+  { label: "Go", lang: "go" },
+  { label: "Java", lang: "java" },
+];
 
 // ponytail: approximates caret pixel position via a mirrored offscreen div
 // (no textarea caret-coordinate API exists). Good enough for menu placement,
@@ -77,14 +92,15 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [unsplashResults, setUnsplashResults] = useState<UnsplashPhoto[]>([]);
   const [unsplashLoading, setUnsplashLoading] = useState(false);
   const [slashMenu, setSlashMenu] = useState<SlashMenuState | null>(null);
+  const [langMenu, setLangMenu] = useState<LangMenuState | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const slashCommands: { label: string; hint: string; snippet: string; cursorOffset?: number; openTable?: boolean }[] = [
+  const slashCommands: { label: string; hint: string; snippet: string; cursorOffset?: number; openTable?: boolean; openLangPicker?: boolean }[] = [
     { label: "표", hint: "테이블", snippet: "", openTable: true },
     { label: "제목 1", hint: "큰 제목", snippet: "# " },
     { label: "제목 2", hint: "중간 제목", snippet: "## " },
     { label: "제목 3", hint: "작은 제목", snippet: "### " },
-    { label: "코드 스코프", hint: "코드 블록", snippet: "```\n\n```", cursorOffset: 4 },
+    { label: "코드 스코프", hint: "코드 블록", snippet: "```\n\n```", cursorOffset: 4, openLangPicker: true },
     { label: "콜아웃", hint: "강조 인용구", snippet: "> 💡 " },
   ];
 
@@ -160,8 +176,20 @@ export default function PostForm({ mode, slug, initial }: Props) {
 
   function runSlashCommand(cmd: (typeof slashCommands)[number]) {
     if (!slashMenu) return;
+    if (cmd.openLangPicker) {
+      setLangMenu({ index: slashMenu.index, top: slashMenu.top, left: slashMenu.left });
+      setSlashMenu(null);
+      return;
+    }
     applyAtSlash(slashMenu.index, cmd.snippet, cmd.cursorOffset);
     if (cmd.openTable) setShowTableBuilder(true);
+  }
+
+  function applyCodeLang(lang: string) {
+    if (!langMenu) return;
+    const snippet = "```" + lang + "\n\n```";
+    applyAtSlash(langMenu.index, snippet, ("```" + lang + "\n").length);
+    setLangMenu(null);
   }
 
   function handleContentChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -178,9 +206,17 @@ export default function PostForm({ mode, slug, initial }: Props) {
     } else if (slashMenu) {
       setSlashMenu(null);
     }
+    if (langMenu) setLangMenu(null);
   }
 
   function handleContentKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (langMenu) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setLangMenu(null);
+      }
+      return;
+    }
     if (slashMenu) {
       if (e.key === "ArrowDown") {
         e.preventDefault();
@@ -406,6 +442,24 @@ export default function PostForm({ mode, slug, initial }: Props) {
                 >
                   <span>{cmd.label}</span>
                   <span className="text-[10px] text-muted">{cmd.hint}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {langMenu && (
+            <div
+              className="absolute z-20 w-40 bg-surface border border-border rounded shadow-lg py-1 font-mono text-xs max-h-56 overflow-y-auto"
+              style={{ top: langMenu.top, left: langMenu.left }}
+            >
+              {CODE_LANGS.map((l) => (
+                <button
+                  key={l.label}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => applyCodeLang(l.lang)}
+                  className="w-full text-left px-2.5 py-1.5 text-muted hover:bg-background hover:text-accent"
+                >
+                  {l.label}
                 </button>
               ))}
             </div>

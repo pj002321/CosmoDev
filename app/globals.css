@@ -413,7 +413,6 @@ header a:not(.btn-accent):hover::after {
 .prose-post h2,
 .prose-post h3 {
   font-family: var(--font-mono);
-  text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--accent);
   margin-top: 2.25rem;

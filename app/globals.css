@@ -588,8 +588,6 @@ header a:not(.btn-accent):hover::after {
 .prose-post table {
   width: 100%;
   border-collapse: collapse;
-  display: block;
-  overflow-x: auto;
   margin-bottom: 1.25rem;
   font-size: 0.9rem;
 }

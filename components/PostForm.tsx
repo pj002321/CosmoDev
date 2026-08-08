@@ -146,6 +146,26 @@ export default function PostForm({ mode, slug, initial }: Props) {
     });
   }
 
+  function wrapSelection(marker: string) {
+    const el = textareaRef.current;
+    if (!el) {
+      setContent((c) => c + marker + marker);
+      return;
+    }
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const selected = content.slice(start, end);
+    const next = content.slice(0, start) + marker + selected + marker + content.slice(end);
+    setContent(next);
+    const cursorStart = start + marker.length;
+    const cursorEnd = cursorStart + selected.length;
+    queueMicrotask(() => {
+      el.focus();
+      el.selectionStart = cursorStart;
+      el.selectionEnd = cursorEnd;
+    });
+  }
+
   function insertAtCursor(insertion: string) {
     const el = textareaRef.current;
     if (el) {
@@ -345,6 +365,34 @@ export default function PostForm({ mode, slug, initial }: Props) {
       />
 
       <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => wrapSelection("**")}
+          title="굵게"
+          className="font-mono text-xs font-bold text-muted border border-border rounded px-2.5 py-1 hover:border-accent"
+        >
+          B
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => wrapSelection("*")}
+          title="기울임"
+          className="font-mono text-xs italic text-muted border border-border rounded px-2.5 py-1 hover:border-accent"
+        >
+          I
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => wrapSelection("~~")}
+          title="취소선"
+          className="font-mono text-xs line-through text-muted border border-border rounded px-2.5 py-1 hover:border-accent"
+        >
+          S
+        </button>
+        <span className="w-px h-4 bg-border" />
         <label className="font-mono text-xs text-muted border border-border rounded px-2 py-1 cursor-pointer hover:border-accent">
           {uploading ? "업로드 중…" : "이미지 삽입"}
           <input

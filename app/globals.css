@@ -465,7 +465,7 @@ header a:not(.btn-accent):hover::after {
   position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: 0;
   padding: 1rem;
   overflow-x: auto;
   margin-bottom: 1.25rem;
@@ -565,8 +565,11 @@ header a:not(.btn-accent):hover::after {
 }
 
 .prose-post blockquote {
+  border: 1px solid var(--border);
   border-left: 2px solid var(--accent);
-  padding-left: 1rem;
+  border-radius: 0;
+  background: var(--surface);
+  padding: 0.85rem 1rem;
   color: var(--muted);
   font-style: italic;
   margin: 1.25rem 0;

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -51,10 +50,47 @@ export const metadata: Metadata = {
   description: "개인 개발 일지",
 };
 
+const FLARE_STAR_COUNT = 20;
+const SHOOTING_STAR_COUNT = 3;
+const PARTICLE_OFFSETS: [number, number][] = [
+  [-26, -16],
+  [22, -20],
+  [30, 12],
+  [-20, 24],
+  [8, 30],
+  [-32, -4],
+];
+
+function rand(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+// Regenerated per request (layout is dynamic via cookies()), so every page
+// load gets a fresh random sky instead of the same fixed star layout.
+function randomSky() {
+  const flareStars = Array.from({ length: FLARE_STAR_COUNT }, () => ({
+    left: rand(2, 98),
+    top: rand(2, 96),
+    delay: rand(0, 9),
+    accentGlow: Math.random() < 0.35,
+  }));
+
+  const shootingStars = Array.from({ length: SHOOTING_STAR_COUNT }, () => ({
+    left: rand(15, 92),
+    top: rand(3, 40),
+    duration: rand(8, 17),
+    delay: rand(0, 10),
+    len: rand(60, 160),
+  }));
+
+  return { flareStars, shootingStars, burstStar: shootingStars[shootingStars.length - 1] };
+}
+
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const cookieStore = await cookies();
   const locale: Locale = cookieStore.get(LOCALE_COOKIE)?.value === "en" ? "en" : "ko";
   const dict = getDict(locale);
+  const { flareStars, shootingStars, burstStar } = randomSky();
 
   return (
     <html
@@ -63,35 +99,56 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <div className="starfield" aria-hidden="true">
-          <span className="flare-star" style={{ left: "12%", top: "18%", animationDelay: "0s" }} />
-          <span className="flare-star" style={{ left: "82%", top: "12%", animationDelay: "0.9s" }} />
-          <span className="flare-star" style={{ left: "30%", top: "55%", animationDelay: "1.8s" }} />
-          <span className="flare-star" style={{ left: "68%", top: "70%", animationDelay: "2.7s" }} />
-          <span className="flare-star" style={{ left: "48%", top: "32%", animationDelay: "3.6s" }} />
-          <span className="flare-star" style={{ left: "90%", top: "60%", animationDelay: "4.5s" }} />
-          <span className="flare-star" style={{ left: "6%", top: "45%", animationDelay: "5.4s" }} />
-          <span className="flare-star" style={{ left: "58%", top: "85%", animationDelay: "6.3s" }} />
-          <span className="flare-star" style={{ left: "22%", top: "8%", animationDelay: "7.2s" }} />
-          <span className="flare-star" style={{ left: "75%", top: "40%", animationDelay: "8.1s" }} />
-          <span className="shooting-star" style={{ left: "70%", top: "10%", animationDuration: "9s", animationDelay: "1s", "--len": "140px" } as React.CSSProperties} />
-          <span className="shooting-star" style={{ left: "40%", top: "5%", animationDuration: "13s", animationDelay: "5s", "--len": "70px" } as React.CSSProperties} />
-          <span className="shooting-star burst" style={{ left: "90%", top: "22%", animationDuration: "16s", animationDelay: "9s", "--len": "100px" } as React.CSSProperties} />
-          <span className="mini-planet" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s" } as React.CSSProperties} />
-          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "-26px", "--py": "-16px" } as React.CSSProperties} />
-          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "22px", "--py": "-20px" } as React.CSSProperties} />
-          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "30px", "--py": "12px" } as React.CSSProperties} />
-          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "-20px", "--py": "24px" } as React.CSSProperties} />
-          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "8px", "--py": "30px" } as React.CSSProperties} />
-          <span className="particle" style={{ left: "calc(90% - 140px)", top: "calc(22% + 100px)", animationDuration: "16s", animationDelay: "9s", "--px": "-32px", "--py": "-4px" } as React.CSSProperties} />
-          <div className="earth-decor">
-            <Image
-              src="/nasa-Q1p7bh3SHj8-unsplash.jpg"
-              alt=""
-              fill
-              sizes="60vw"
-              className="object-cover"
+          {flareStars.map((s, i) => (
+            <span
+              key={i}
+              className="flare-star"
+              style={{
+                left: `${s.left}%`,
+                top: `${s.top}%`,
+                animationDelay: `${s.delay.toFixed(2)}s`,
+                ...(s.accentGlow
+                  ? { "--flare-glow": "color-mix(in srgb, var(--accent) 80%, transparent)" }
+                  : {}),
+              } as React.CSSProperties}
             />
-          </div>
+          ))}
+          {shootingStars.map((s, i) => (
+            <span
+              key={i}
+              className={`shooting-star${s === burstStar ? " burst" : ""}`}
+              style={{
+                left: `${s.left}%`,
+                top: `${s.top}%`,
+                animationDuration: `${s.duration.toFixed(2)}s`,
+                animationDelay: `${s.delay.toFixed(2)}s`,
+                "--len": `${s.len.toFixed(0)}px`,
+              } as React.CSSProperties}
+            />
+          ))}
+          <span
+            className="mini-planet"
+            style={{
+              left: `calc(${burstStar.left}% - 140px)`,
+              top: `calc(${burstStar.top}% + 100px)`,
+              animationDuration: `${burstStar.duration.toFixed(2)}s`,
+              animationDelay: `${burstStar.delay.toFixed(2)}s`,
+            } as React.CSSProperties}
+          />
+          {PARTICLE_OFFSETS.map(([px, py], i) => (
+            <span
+              key={i}
+              className="particle"
+              style={{
+                left: `calc(${burstStar.left}% - 140px)`,
+                top: `calc(${burstStar.top}% + 100px)`,
+                animationDuration: `${burstStar.duration.toFixed(2)}s`,
+                animationDelay: `${burstStar.delay.toFixed(2)}s`,
+                "--px": `${px}px`,
+                "--py": `${py}px`,
+              } as React.CSSProperties}
+            />
+          ))}
         </div>
         <ClerkProvider appearance={clerkAppearance}>
           <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">

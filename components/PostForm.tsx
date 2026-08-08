@@ -131,6 +131,18 @@ export default function PostForm({ mode, slug, initial }: Props) {
     return () => clearTimeout(timer);
   }, [content]);
 
+  // ponytail: execCommand is deprecated but it's still the only way to make a
+  // programmatic textarea edit land on the browser's native undo stack
+  // (Ctrl/Cmd+Z) — setting .value directly (via setContent) clears that stack.
+  function insertTextNative(el: HTMLTextAreaElement, start: number, end: number, text: string) {
+    el.focus();
+    el.setSelectionRange(start, end);
+    if (!document.execCommand("insertText", false, text)) {
+      el.setRangeText(text, start, end, "end");
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+
   function handleTabKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key !== "Tab") return;
     const el = e.currentTarget;
@@ -138,12 +150,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
     const fenceCount = (content.slice(0, start).match(/^```/gm) ?? []).length;
     if (fenceCount % 2 === 0) return;
     e.preventDefault();
-    const end = el.selectionEnd;
-    const next = content.slice(0, start) + "\t" + content.slice(end);
-    setContent(next);
-    requestAnimationFrame(() => {
-      el.selectionStart = el.selectionEnd = start + 1;
-    });
+    insertTextNative(el, start, el.selectionEnd, "\t");
   }
 
   function wrapSelection(marker: string) {
@@ -154,9 +161,8 @@ export default function PostForm({ mode, slug, initial }: Props) {
     }
     const start = el.selectionStart;
     const end = el.selectionEnd;
-    const selected = content.slice(start, end);
-    const next = content.slice(0, start) + marker + selected + marker + content.slice(end);
-    setContent(next);
+    const selected = el.value.slice(start, end);
+    insertTextNative(el, start, end, marker + selected + marker);
     const cursorStart = start + marker.length;
     const cursorEnd = cursorStart + selected.length;
     queueMicrotask(() => {
@@ -169,28 +175,22 @@ export default function PostForm({ mode, slug, initial }: Props) {
   function insertAtCursor(insertion: string) {
     const el = textareaRef.current;
     if (el) {
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const next = content.slice(0, start) + insertion + content.slice(end);
-      setContent(next);
-      requestAnimationFrame(() => {
-        el.focus();
-        el.selectionStart = el.selectionEnd = start + insertion.length;
-      });
+      insertTextNative(el, el.selectionStart, el.selectionEnd, insertion);
     } else {
       setContent((c) => c + insertion);
     }
   }
 
   function applyAtSlash(index: number, snippet: string, cursorOffset?: number) {
-    const next = content.slice(0, index) + snippet + content.slice(index + 1);
-    setContent(next);
     const el = textareaRef.current;
-    const pos = index + (cursorOffset ?? snippet.length);
-    queueMicrotask(() => {
-      el?.focus();
-      if (el) el.selectionStart = el.selectionEnd = pos;
-    });
+    if (el) {
+      insertTextNative(el, index, index + 1, snippet);
+      const pos = index + (cursorOffset ?? snippet.length);
+      queueMicrotask(() => {
+        el.focus();
+        el.selectionStart = el.selectionEnd = pos;
+      });
+    }
     setSlashMenu(null);
   }
 
@@ -277,6 +277,15 @@ export default function PostForm({ mode, slug, initial }: Props) {
     } finally {
       setUploading(false);
     }
+  }
+
+  function handleContentPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+    const file = Array.from(e.clipboardData.items)
+      .find((item) => item.type.startsWith("image/"))
+      ?.getAsFile();
+    if (!file) return;
+    e.preventDefault();
+    handleImageUpload(file);
   }
 
   function handleUnsplashSelect(photo: UnsplashPhoto) {
@@ -468,6 +477,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
             value={content}
             onChange={handleContentChange}
             onKeyDown={handleContentKeyDown}
+            onPaste={handleContentPaste}
             placeholder="마크다운으로 작성하세요 ( / 로 빠른 삽입 메뉴)"
             required
             className="w-full bg-surface border border-border rounded px-3 py-2 font-mono text-sm leading-relaxed outline-none focus:border-accent h-[36rem] resize-none"

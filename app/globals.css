@@ -128,7 +128,7 @@ body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--accent);
+    background: radial-gradient(circle, #fff 0%, var(--accent) 40%, color-mix(in srgb, var(--accent) 60%, transparent) 75%, transparent 100%);
     box-shadow: 0 0 34px 12px color-mix(in srgb, var(--accent) 80%, transparent);
     transform: translate(-140px, 100px) rotate(0deg) scale(2.4);
   }
@@ -137,6 +137,7 @@ body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
+    background: radial-gradient(circle, #fff 0%, var(--accent) 40%, color-mix(in srgb, var(--accent) 60%, transparent) 75%, transparent 100%);
     box-shadow: 0 0 20px 6px color-mix(in srgb, var(--accent) 45%, transparent);
     transform: translate(-140px, 100px) rotate(0deg) scale(1.5);
   }
@@ -145,6 +146,7 @@ body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
+    background: radial-gradient(circle, #fff 0%, var(--accent) 40%, color-mix(in srgb, var(--accent) 60%, transparent) 75%, transparent 100%);
     box-shadow: none;
     transform: translate(-140px, 100px) rotate(0deg) scale(0.4);
   }
@@ -155,7 +157,8 @@ body {
   width: var(--psize, 4px);
   height: var(--psize, 4px);
   border-radius: 50%;
-  background: var(--accent);
+  background: radial-gradient(circle, #fff 0%, var(--accent) 45%, transparent 100%);
+  box-shadow: 0 0 6px 1px color-mix(in srgb, var(--accent) 60%, transparent);
   opacity: 0;
   animation: particle-burst linear infinite;
 }

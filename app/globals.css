@@ -160,8 +160,8 @@ body {
   width: var(--psize, 4px);
   height: var(--psize, 4px);
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0%, var(--accent) 45%, transparent 100%);
-  box-shadow: 0 0 6px 1px color-mix(in srgb, var(--accent) 60%, transparent);
+  background: var(--foreground);
+  box-shadow: 0 0 12px 4px color-mix(in srgb, var(--accent) 75%, transparent);
   opacity: 0;
   animation: particle-burst linear infinite;
 }

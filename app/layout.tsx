@@ -73,14 +73,14 @@ function randomSky() {
   const flareStars = Array.from({ length: FLARE_STAR_COUNT }, () => ({
     left: rand(2, 98),
     top: rand(2, 96),
-    delay: rand(0, 9),
+    delay: rand(0, 15),
     accentGlow: Math.random() < 0.35,
   }));
 
   const shootingStars = Array.from({ length: SHOOTING_STAR_COUNT }, () => ({
     left: rand(15, 92),
     top: rand(3, 40),
-    duration: rand(8, 17),
+    duration: rand(10, 26),
     delay: rand(0, 10),
     len: rand(60, 160),
   }));
@@ -139,6 +139,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 animationDelay: `${burstStar.delay.toFixed(2)}s`,
                 "--px": `${px}px`,
                 "--py": `${py}px`,
+                "--psize": `${3 + (i % 3) * 1.5}px`,
               } as React.CSSProperties}
             />
           ))}

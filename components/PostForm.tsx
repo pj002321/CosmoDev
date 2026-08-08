@@ -28,6 +28,38 @@ type UnsplashPhoto = {
   authorUrl: string;
 };
 
+type SlashMenuState = { index: number; top: number; left: number; active: number };
+
+// ponytail: approximates caret pixel position via a mirrored offscreen div
+// (no textarea caret-coordinate API exists). Good enough for menu placement,
+// not pixel-perfect on window resize.
+function getCaretCoords(el: HTMLTextAreaElement, pos: number) {
+  const div = document.createElement("div");
+  const style = window.getComputedStyle(el);
+  const props = [
+    "box-sizing", "width", "padding-top", "padding-right", "padding-bottom", "padding-left",
+    "border-top-width", "border-right-width", "border-bottom-width", "border-left-width",
+    "font-family", "font-size", "font-weight", "letter-spacing", "line-height",
+  ];
+  for (const p of props) div.style.setProperty(p, style.getPropertyValue(p));
+  div.style.position = "absolute";
+  div.style.visibility = "hidden";
+  div.style.whiteSpace = "pre-wrap";
+  div.style.wordWrap = "break-word";
+  div.style.top = "0";
+  div.style.left = "-9999px";
+  document.body.appendChild(div);
+  div.textContent = el.value.slice(0, pos);
+  const span = document.createElement("span");
+  span.textContent = el.value.slice(pos) || ".";
+  div.appendChild(span);
+  const lineHeight = parseFloat(style.lineHeight) || 20;
+  const top = span.offsetTop - el.scrollTop + lineHeight;
+  const left = span.offsetLeft - el.scrollLeft;
+  document.body.removeChild(div);
+  return { top, left };
+}
+
 export default function PostForm({ mode, slug, initial }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "");
@@ -44,7 +76,17 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [unsplashQuery, setUnsplashQuery] = useState("");
   const [unsplashResults, setUnsplashResults] = useState<UnsplashPhoto[]>([]);
   const [unsplashLoading, setUnsplashLoading] = useState(false);
+  const [slashMenu, setSlashMenu] = useState<SlashMenuState | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const slashCommands: { label: string; hint: string; snippet: string; cursorOffset?: number; openTable?: boolean }[] = [
+    { label: "표", hint: "테이블", snippet: "", openTable: true },
+    { label: "제목 1", hint: "큰 제목", snippet: "# " },
+    { label: "제목 2", hint: "중간 제목", snippet: "## " },
+    { label: "제목 3", hint: "작은 제목", snippet: "### " },
+    { label: "코드 스코프", hint: "코드 블록", snippet: "```\n\n```", cursorOffset: 4 },
+    { label: "콜아웃", hint: "강조 인용구", snippet: "> 💡 " },
+  ];
 
   useEffect(() => {
     if (!showUnsplash || !unsplashQuery.trim()) return;
@@ -102,6 +144,66 @@ export default function PostForm({ mode, slug, initial }: Props) {
     } else {
       setContent((c) => c + insertion);
     }
+  }
+
+  function applyAtSlash(index: number, snippet: string, cursorOffset?: number) {
+    const next = content.slice(0, index) + snippet + content.slice(index + 1);
+    setContent(next);
+    const el = textareaRef.current;
+    const pos = index + (cursorOffset ?? snippet.length);
+    queueMicrotask(() => {
+      el?.focus();
+      if (el) el.selectionStart = el.selectionEnd = pos;
+    });
+    setSlashMenu(null);
+  }
+
+  function runSlashCommand(cmd: (typeof slashCommands)[number]) {
+    if (!slashMenu) return;
+    applyAtSlash(slashMenu.index, cmd.snippet, cmd.cursorOffset);
+    if (cmd.openTable) setShowTableBuilder(true);
+  }
+
+  function handleContentChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    const next = e.target.value;
+    const el = e.target;
+    const pos = el.selectionStart;
+    setContent(next);
+
+    const justTyped = next[pos - 1];
+    const before = pos >= 2 ? next[pos - 2] : undefined;
+    if (justTyped === "/" && (pos === 1 || before === "\n")) {
+      const { top, left } = getCaretCoords(el, pos);
+      setSlashMenu({ index: pos - 1, top, left, active: 0 });
+    } else if (slashMenu) {
+      setSlashMenu(null);
+    }
+  }
+
+  function handleContentKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (slashMenu) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSlashMenu((m) => (m ? { ...m, active: (m.active + 1) % slashCommands.length } : m));
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSlashMenu((m) => (m ? { ...m, active: (m.active - 1 + slashCommands.length) % slashCommands.length } : m));
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        runSlashCommand(slashCommands[slashMenu.active]);
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setSlashMenu(null);
+        return;
+      }
+    }
+    handleTabKey(e);
   }
 
   async function handleImageUpload(file: File) {
@@ -276,15 +378,39 @@ export default function PostForm({ mode, slug, initial }: Props) {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <textarea
-          ref={textareaRef}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          onKeyDown={handleTabKey}
-          placeholder="마크다운으로 작성하세요"
-          required
-          className="bg-surface border border-border rounded px-3 py-2 font-mono text-sm leading-relaxed outline-none focus:border-accent h-[36rem] resize-none"
-        />
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            value={content}
+            onChange={handleContentChange}
+            onKeyDown={handleContentKeyDown}
+            placeholder="마크다운으로 작성하세요 ( / 로 빠른 삽입 메뉴)"
+            required
+            className="w-full bg-surface border border-border rounded px-3 py-2 font-mono text-sm leading-relaxed outline-none focus:border-accent h-[36rem] resize-none"
+          />
+          {slashMenu && (
+            <div
+              className="absolute z-20 w-44 bg-surface border border-border rounded shadow-lg py-1 font-mono text-xs"
+              style={{ top: slashMenu.top, left: slashMenu.left }}
+            >
+              {slashCommands.map((cmd, i) => (
+                <button
+                  key={cmd.label}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => runSlashCommand(cmd)}
+                  onMouseEnter={() => setSlashMenu((m) => (m ? { ...m, active: i } : m))}
+                  className={`w-full text-left px-2.5 py-1.5 flex items-center justify-between gap-2 ${
+                    i === slashMenu.active ? "bg-background text-accent" : "text-muted"
+                  }`}
+                >
+                  <span>{cmd.label}</span>
+                  <span className="text-[10px] text-muted">{cmd.hint}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="border border-border rounded px-4 py-3 h-[36rem] overflow-y-auto">
           {previewHtml ? (
             <div className="prose-post" dangerouslySetInnerHTML={{ __html: previewHtml }} />

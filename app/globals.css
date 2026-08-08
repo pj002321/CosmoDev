@@ -107,77 +107,38 @@ body {
     opacity: 1;
     transform: translate(0, 0) rotate(-35deg) scale(1);
   }
-  98.3% {
+  98% {
     opacity: 1;
     width: var(--len, 110px);
     height: 2px;
     transform: translate(-140px, 100px) rotate(-35deg) scale(1);
   }
-  98.6% {
-    opacity: 1;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--foreground);
-    box-shadow: 0 0 22px 8px color-mix(in srgb, var(--foreground) 70%, transparent);
-    transform: translate(-140px, 100px) rotate(0deg) scale(1.8);
-  }
-  100% {
-    opacity: 0;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    box-shadow: none;
-    transform: translate(-140px, 100px) rotate(0deg) scale(0.4);
-  }
-}
-
-.mini-planet {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #cbd5ff, #6366f1 60%, #312e81);
-  opacity: 0;
-  animation: planet-cycle linear infinite;
-}
-
-@keyframes planet-cycle {
-  0%, 90% {
-    opacity: 0;
-    box-shadow: none;
-    transform: scale(0.3);
-  }
-  92% {
-    opacity: 1;
-    box-shadow: 0 0 8px 2px color-mix(in srgb, #6366f1 55%, transparent);
-    transform: scale(1);
-  }
   98.3% {
     opacity: 1;
-    box-shadow: 0 0 8px 2px color-mix(in srgb, #6366f1 55%, transparent);
-    transform: scale(1);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 30px 10px color-mix(in srgb, var(--accent) 75%, transparent);
+    transform: translate(-140px, 100px) rotate(0deg) scale(2.2);
   }
-  98.6% {
-    opacity: 1;
-    box-shadow: 0 0 24px 10px color-mix(in srgb, var(--foreground) 70%, transparent);
-    transform: scale(1.5);
-  }
-  99% {
+  99.5% {
     opacity: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
     box-shadow: none;
-    transform: scale(0);
+    transform: translate(-140px, 100px) rotate(0deg) scale(0.3);
   }
   100% {
     opacity: 0;
-    transform: scale(0);
   }
 }
 
 .particle {
   position: absolute;
-  width: 3px;
-  height: 3px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: var(--accent);
   opacity: 0;
@@ -185,17 +146,20 @@ body {
 }
 
 @keyframes particle-burst {
-  0%, 98.5% {
+  0%, 98% {
     opacity: 0;
-    transform: translate(0, 0) scale(0.5);
+    transform: translate(0, 0) scale(0.4);
   }
-  98.7% {
+  98.3% {
     opacity: 1;
     transform: translate(0, 0) scale(1);
   }
-  100% {
+  99.5% {
     opacity: 0;
     transform: translate(var(--px, 20px), var(--py, 20px)) scale(0.2);
+  }
+  100% {
+    opacity: 0;
   }
 }
 

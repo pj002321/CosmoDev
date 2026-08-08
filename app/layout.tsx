@@ -53,12 +53,14 @@ export const metadata: Metadata = {
 const FLARE_STAR_COUNT = 20;
 const SHOOTING_STAR_COUNT = 3;
 const PARTICLE_OFFSETS: [number, number][] = [
-  [-26, -16],
-  [22, -20],
-  [30, 12],
-  [-20, 24],
-  [8, 30],
-  [-32, -4],
+  [-42, -26],
+  [36, -32],
+  [48, 18],
+  [-32, 38],
+  [12, 48],
+  [-50, -8],
+  [4, -46],
+  [40, 4],
 ];
 
 function rand(min: number, max: number) {
@@ -126,15 +128,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               } as React.CSSProperties}
             />
           ))}
-          <span
-            className="mini-planet"
-            style={{
-              left: `calc(${burstStar.left}% - 140px)`,
-              top: `calc(${burstStar.top}% + 100px)`,
-              animationDuration: `${burstStar.duration.toFixed(2)}s`,
-              animationDelay: `${burstStar.delay.toFixed(2)}s`,
-            } as React.CSSProperties}
-          />
           {PARTICLE_OFFSETS.map(([px, py], i) => (
             <span
               key={i}

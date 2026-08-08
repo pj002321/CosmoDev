@@ -93,8 +93,8 @@ function randomSky() {
 
   const flareStars = Array.from({ length: FLARE_STAR_COUNT }, (_, i) =>
     i === targetIndex
-      ? { left: targetLeft, top: targetTop, delay: burstDelay, duration: burstDuration, accentGlow: true }
-      : { left: rand(2, 98), top: rand(2, 96), delay: rand(0, 15), duration: 15, accentGlow: Math.random() < 0.35 }
+      ? { left: targetLeft, top: targetTop, delay: burstDelay, duration: burstDuration, accentGlow: false, isTarget: true }
+      : { left: rand(2, 98), top: rand(2, 96), delay: rand(0, 15), duration: 15, accentGlow: Math.random() < 0.35, isTarget: false }
   );
 
   const shootingStars = [
@@ -137,7 +137,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           {flareStars.map((s, i) => (
             <span
               key={i}
-              className="flare-star"
+              className={`flare-star${s.isTarget ? " target" : ""}`}
               style={{
                 left: `${s.left}%`,
                 top: `${s.top}%`,

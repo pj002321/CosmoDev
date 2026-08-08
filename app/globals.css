@@ -65,6 +65,36 @@ body {
   }
 }
 
+/* The star a shooting star is aimed at: same star design, just flares up
+   bigger right when the streak arrives (synced via matching duration/delay
+   in layout.tsx) instead of a separate, misaligned "burst" shape. */
+.flare-star.target {
+  animation-name: flare-impact;
+}
+
+@keyframes flare-impact {
+  0%, 90%, 100% {
+    opacity: 0.25;
+    box-shadow: none;
+    transform: scale(1);
+  }
+  95% {
+    opacity: 1;
+    box-shadow: 0 0 24px 7px color-mix(in srgb, var(--foreground) 75%, transparent);
+    transform: scale(3);
+  }
+  96.4% {
+    opacity: 1;
+    box-shadow: 0 0 60px 20px color-mix(in srgb, var(--foreground) 80%, transparent);
+    transform: scale(6);
+  }
+  98% {
+    opacity: 0.9;
+    box-shadow: 0 0 26px 8px color-mix(in srgb, var(--foreground) 45%, transparent);
+    transform: scale(2);
+  }
+}
+
 .shooting-star {
   position: absolute;
   width: var(--len, 110px);
@@ -101,57 +131,30 @@ body {
   0%, 82% {
     opacity: 0;
     width: var(--len, 110px);
-    height: 2px;
-    border-radius: 999px;
-    background: linear-gradient(to bottom left, transparent, color-mix(in srgb, var(--foreground) 85%, transparent));
-    box-shadow: none;
     transform: translate(0, 0) rotate(var(--angle, -35deg)) scale(1);
   }
   83% {
     opacity: 1;
     width: var(--len, 110px);
-    height: 2px;
-    border-radius: 999px;
-    background: linear-gradient(to bottom left, transparent, color-mix(in srgb, var(--foreground) 85%, transparent));
-    box-shadow: none;
     transform: translate(0, 0) rotate(var(--angle, -35deg)) scale(1);
     animation-timing-function: ease-out;
   }
-  96% {
+  95% {
     opacity: 1;
     width: var(--len, 110px);
-    height: 2px;
-    border-radius: 999px;
-    background: linear-gradient(to bottom left, transparent, color-mix(in srgb, var(--foreground) 85%, transparent));
-    box-shadow: none;
     transform: translate(var(--dx, -45vw), var(--dy, 35vh)) rotate(var(--angle, -35deg)) scale(1);
   }
-  96.6% {
-    opacity: 1;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #fff 0%, var(--accent) 40%, color-mix(in srgb, var(--accent) 60%, transparent) 75%, transparent 100%);
-    box-shadow: 0 0 34px 12px color-mix(in srgb, var(--accent) 80%, transparent);
-    transform: translate(var(--dx, -45vw), var(--dy, 35vh)) rotate(0deg) scale(2.4);
-  }
-  98% {
-    opacity: 0.85;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #fff 0%, var(--accent) 40%, color-mix(in srgb, var(--accent) 60%, transparent) 75%, transparent 100%);
-    box-shadow: 0 0 20px 6px color-mix(in srgb, var(--accent) 45%, transparent);
-    transform: translate(var(--dx, -45vw), var(--dy, 35vh)) rotate(0deg) scale(1.5);
+  96.4% {
+    /* tapers into the target star's own flare-impact flash instead of
+       becoming a separate (and inevitably misaligned) burst shape */
+    opacity: 0;
+    width: 0px;
+    transform: translate(var(--dx, -45vw), var(--dy, 35vh)) rotate(var(--angle, -35deg)) scale(1);
   }
   100% {
     opacity: 0;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #fff 0%, var(--accent) 40%, color-mix(in srgb, var(--accent) 60%, transparent) 75%, transparent 100%);
-    box-shadow: none;
-    transform: translate(var(--dx, -45vw), var(--dy, 35vh)) rotate(0deg) scale(0.4);
+    width: 0px;
+    transform: translate(var(--dx, -45vw), var(--dy, 35vh)) rotate(var(--angle, -35deg)) scale(1);
   }
 }
 
@@ -167,7 +170,7 @@ body {
 }
 
 @keyframes particle-burst {
-  0%, 96.6% {
+  0%, 96.4% {
     opacity: 0;
     transform: translate(0, 0) rotate(0deg) scale(0.4);
   }

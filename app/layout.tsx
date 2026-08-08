@@ -67,32 +67,65 @@ function rand(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
+// ponytail: assumes a ~16:10 viewport to tilt the streak so it visually
+// points along its travel vector. The landing spot itself is exact (vw/vh
+// translate matches the target star's own % position 1:1, since .starfield
+// fills the viewport) — this constant only affects how "straight" the tilt
+// looks on unusually wide/narrow screens. Upgrade: measure real aspect
+// ratio client-side if that ever looks off.
+const ASSUMED_ASPECT = 1.6;
+
 // Regenerated per request (layout is dynamic via cookies()), so every page
 // load gets a fresh random sky instead of the same fixed star layout.
 function randomSky() {
-  const flareStars = Array.from({ length: FLARE_STAR_COUNT }, () => ({
-    left: rand(2, 98),
-    top: rand(2, 96),
-    delay: rand(0, 15),
-    accentGlow: Math.random() < 0.35,
-  }));
+  const targetIndex = Math.floor(Math.random() * FLARE_STAR_COUNT);
 
-  const shootingStars = Array.from({ length: SHOOTING_STAR_COUNT }, () => ({
-    left: rand(15, 92),
-    top: rand(3, 40),
-    duration: rand(10, 26),
-    delay: rand(0, 10),
-    len: rand(60, 160),
-  }));
+  const burstLeft = rand(40, 92);
+  const burstTop = rand(3, 30);
+  const burstDuration = rand(10, 26);
+  const burstDelay = rand(0, 10);
+  const targetLeft = rand(2, burstLeft - 15);
+  const targetTop = rand(burstTop + 20, 96);
 
-  return { flareStars, shootingStars, burstStar: shootingStars[shootingStars.length - 1] };
+  const dxPct = targetLeft - burstLeft;
+  const dyPct = targetTop - burstTop;
+  const angle = -(Math.atan2(dyPct, -dxPct * ASSUMED_ASPECT) * 180) / Math.PI;
+
+  const flareStars = Array.from({ length: FLARE_STAR_COUNT }, (_, i) =>
+    i === targetIndex
+      ? { left: targetLeft, top: targetTop, delay: burstDelay, duration: burstDuration, accentGlow: true }
+      : { left: rand(2, 98), top: rand(2, 96), delay: rand(0, 15), duration: 15, accentGlow: Math.random() < 0.35 }
+  );
+
+  const shootingStars = [
+    ...Array.from({ length: SHOOTING_STAR_COUNT - 1 }, () => ({
+      left: rand(15, 92),
+      top: rand(3, 40),
+      duration: rand(10, 26),
+      delay: rand(0, 10),
+      len: rand(60, 160),
+      burst: false as const,
+    })),
+    {
+      left: burstLeft,
+      top: burstTop,
+      duration: burstDuration,
+      delay: burstDelay,
+      len: rand(90, 150),
+      burst: true as const,
+    },
+  ];
+
+  const burstStar = shootingStars[shootingStars.length - 1];
+
+  return { flareStars, shootingStars, burstStar, target: flareStars[targetIndex], dxPct, dyPct, angle };
 }
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const cookieStore = await cookies();
   const locale: Locale = cookieStore.get(LOCALE_COOKIE)?.value === "en" ? "en" : "ko";
   const dict = getDict(locale);
-  const { flareStars, shootingStars, burstStar } = randomSky();
+  const { flareStars, shootingStars, burstStar, target, dxPct, dyPct, angle } = randomSky();
 
   return (
     <html
@@ -108,6 +141,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               style={{
                 left: `${s.left}%`,
                 top: `${s.top}%`,
+                animationDuration: `${s.duration.toFixed(2)}s`,
                 animationDelay: `${s.delay.toFixed(2)}s`,
                 ...(s.accentGlow
                   ? { "--flare-glow": "color-mix(in srgb, var(--accent) 80%, transparent)" }
@@ -118,13 +152,20 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           {shootingStars.map((s, i) => (
             <span
               key={i}
-              className={`shooting-star${s === burstStar ? " burst" : ""}`}
+              className={`shooting-star${s.burst ? " burst" : ""}`}
               style={{
                 left: `${s.left}%`,
                 top: `${s.top}%`,
                 animationDuration: `${s.duration.toFixed(2)}s`,
                 animationDelay: `${s.delay.toFixed(2)}s`,
                 "--len": `${s.len.toFixed(0)}px`,
+                ...(s.burst
+                  ? {
+                      "--dx": `${dxPct.toFixed(2)}vw`,
+                      "--dy": `${dyPct.toFixed(2)}vh`,
+                      "--angle": `${angle.toFixed(1)}deg`,
+                    }
+                  : {}),
               } as React.CSSProperties}
             />
           ))}
@@ -133,8 +174,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               key={i}
               className="particle"
               style={{
-                left: `calc(${burstStar.left}% - 140px)`,
-                top: `calc(${burstStar.top}% + 100px)`,
+                left: `${target.left}%`,
+                top: `${target.top}%`,
                 animationDuration: `${burstStar.duration.toFixed(2)}s`,
                 animationDelay: `${burstStar.delay.toFixed(2)}s`,
                 "--px": `${px}px`,

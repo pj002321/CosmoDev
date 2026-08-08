@@ -46,7 +46,10 @@ body {
   border-radius: 50%;
   background: var(--foreground);
   opacity: 0.25;
-  animation: flare-pulse 15s ease-in-out infinite;
+  animation-name: flare-pulse;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-duration: 15s;
 }
 
 @keyframes flare-pulse {
@@ -102,7 +105,7 @@ body {
     border-radius: 999px;
     background: linear-gradient(to bottom left, transparent, color-mix(in srgb, var(--foreground) 85%, transparent));
     box-shadow: none;
-    transform: translate(0, 0) rotate(-35deg) scale(1);
+    transform: translate(0, 0) rotate(var(--angle, -35deg)) scale(1);
   }
   83% {
     opacity: 1;
@@ -111,7 +114,7 @@ body {
     border-radius: 999px;
     background: linear-gradient(to bottom left, transparent, color-mix(in srgb, var(--foreground) 85%, transparent));
     box-shadow: none;
-    transform: translate(0, 0) rotate(-35deg) scale(1);
+    transform: translate(0, 0) rotate(var(--angle, -35deg)) scale(1);
     animation-timing-function: ease-out;
   }
   96% {
@@ -121,7 +124,7 @@ body {
     border-radius: 999px;
     background: linear-gradient(to bottom left, transparent, color-mix(in srgb, var(--foreground) 85%, transparent));
     box-shadow: none;
-    transform: translate(-140px, 100px) rotate(-35deg) scale(1);
+    transform: translate(var(--dx, -45vw), var(--dy, 35vh)) rotate(var(--angle, -35deg)) scale(1);
   }
   96.6% {
     opacity: 1;
@@ -130,7 +133,7 @@ body {
     border-radius: 50%;
     background: radial-gradient(circle, #fff 0%, var(--accent) 40%, color-mix(in srgb, var(--accent) 60%, transparent) 75%, transparent 100%);
     box-shadow: 0 0 34px 12px color-mix(in srgb, var(--accent) 80%, transparent);
-    transform: translate(-140px, 100px) rotate(0deg) scale(2.4);
+    transform: translate(var(--dx, -45vw), var(--dy, 35vh)) rotate(0deg) scale(2.4);
   }
   98% {
     opacity: 0.85;
@@ -139,7 +142,7 @@ body {
     border-radius: 50%;
     background: radial-gradient(circle, #fff 0%, var(--accent) 40%, color-mix(in srgb, var(--accent) 60%, transparent) 75%, transparent 100%);
     box-shadow: 0 0 20px 6px color-mix(in srgb, var(--accent) 45%, transparent);
-    transform: translate(-140px, 100px) rotate(0deg) scale(1.5);
+    transform: translate(var(--dx, -45vw), var(--dy, 35vh)) rotate(0deg) scale(1.5);
   }
   100% {
     opacity: 0;
@@ -148,7 +151,7 @@ body {
     border-radius: 50%;
     background: radial-gradient(circle, #fff 0%, var(--accent) 40%, color-mix(in srgb, var(--accent) 60%, transparent) 75%, transparent 100%);
     box-shadow: none;
-    transform: translate(-140px, 100px) rotate(0deg) scale(0.4);
+    transform: translate(var(--dx, -45vw), var(--dy, 35vh)) rotate(0deg) scale(0.4);
   }
 }
 

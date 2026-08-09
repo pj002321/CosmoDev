@@ -1,11 +1,12 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getPostsByAuthor, uniqueTags } from "@/lib/posts";
 import { getTagline } from "@/lib/profiles";
 import { getLikeCounts } from "@/lib/likes";
 import { isFollowing } from "@/lib/follows";
-import { UserIcon } from "@/components/icons";
-import PostCard from "@/components/PostCard";
+import { UserIcon, GraphIcon } from "@/components/icons";
+import PostFilter from "@/components/PostFilter";
 import FollowButton from "@/components/FollowButton";
 
 export const dynamic = "force-dynamic";
@@ -38,30 +39,23 @@ export default async function ProfilePage({
           <div>
             <p className="font-mono text-xs text-muted animate-fade-in">▸ PROFILE</p>
             <h1 className="text-xl font-semibold animate-fade-in">{tagline}</h1>
-            {categories.length > 0 && (
-              <div className="flex gap-1.5 mt-2 flex-wrap">
-                {categories.map((tag) => (
-                  <span
-                    key={tag}
-                    className="font-mono text-[11px] uppercase tracking-wide text-muted border border-border rounded px-1.5 py-0.5"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
         </div>
-        {userId && userId !== id && (
-          <FollowButton followeeId={id} followeeName={posts[0].authorName} initialFollowing={following} />
-        )}
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/graph?id=${id}`}
+            className="flex items-center gap-1.5 font-mono text-xs border border-border rounded px-2 py-1.5 hover:border-accent"
+          >
+            <GraphIcon className="w-3.5 h-3.5" />
+            그래프
+          </Link>
+          {userId && userId !== id && (
+            <FollowButton followeeId={id} followeeName={posts[0].authorName} initialFollowing={following} />
+          )}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {posts.map((post, i) => (
-          <PostCard key={post.slug} post={post} index={i} />
-        ))}
-      </div>
+      <PostFilter posts={posts} categories={categories} allLabel="전체" emptyLabel="아직 작성된 글이 없습니다." />
     </div>
   );
 }

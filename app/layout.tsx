@@ -191,7 +191,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <ClerkProvider appearance={clerkAppearance}>
           <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
             <div className="mx-auto max-w-4xl px-6 py-4 flex items-center justify-between">
-              <Link href="/" className="flex items-center gap-2.5 font-mono text-sm tracking-wide">
+              <Link href="/" className="flex items-center gap-2.5 font-mono text-xl font-bold tracking-wide">
                 <span className="flex gap-1">
                   <span className="term-dot" />
                   <span className="term-dot" />

@@ -6,6 +6,7 @@ import { getLikeState } from "@/lib/likes";
 import { EyeIcon } from "@/components/icons";
 import DeletePostButton from "@/components/DeletePostButton";
 import LikeButton from "@/components/LikeButton";
+import PostWidthToggle from "@/components/PostWidthToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -22,11 +23,13 @@ export default async function PostPage({
   const [views, likeState] = await Promise.all([incrementViews(slug), getLikeState(slug, userId)]);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-12">
-      <Link href="/" className="font-mono text-xs text-muted hover:text-accent">
-        ▸ ARCHIVE로 돌아가기
-      </Link>
-
+    <PostWidthToggle
+      backLink={
+        <Link href="/" className="font-mono text-xs text-muted hover:text-accent">
+          ▸ ARCHIVE로 돌아가기
+        </Link>
+      }
+    >
       <div className="mt-6 bg-surface border border-border rounded-lg px-6 py-6">
         <div className="mb-8 border-b border-border pb-6">
           <div className="flex items-center justify-between mb-3">
@@ -77,6 +80,6 @@ export default async function PostPage({
           dangerouslySetInnerHTML={{ __html: post.contentHtml }}
         />
       </div>
-    </div>
+    </PostWidthToggle>
   );
 }

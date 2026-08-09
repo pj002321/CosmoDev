@@ -34,6 +34,10 @@ type UnsplashPhoto = {
 type SlashMenuState = { index: number; top: number; left: number; active: number };
 type LangMenuState = { index: number; top: number; left: number };
 
+const DETAILS_SNIPPET = "<details>\n<summary>제목</summary>\n\n내용\n\n</details>";
+const DETAILS_TITLE_OFFSET = "<details>\n<summary>".length;
+const DETAILS_TITLE_LEN = "제목".length;
+
 const CODE_LANGS: { label: string; lang: string }[] = [
   { label: "자동 감지", lang: "" },
   { label: "JavaScript", lang: "js" },
@@ -103,13 +107,20 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [langMenu, setLangMenu] = useState<LangMenuState | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const slashCommands: { label: string; hint: string; snippet: string; cursorOffset?: number; openTable?: boolean; openLangPicker?: boolean }[] = [
+  const slashCommands: { label: string; hint: string; snippet: string; cursorOffset?: number; cursorSelectLength?: number; openTable?: boolean; openLangPicker?: boolean }[] = [
     { label: "표", hint: "테이블", snippet: "", openTable: true },
     { label: "제목 1", hint: "큰 제목", snippet: "# " },
     { label: "제목 2", hint: "중간 제목", snippet: "## " },
     { label: "제목 3", hint: "작은 제목", snippet: "### " },
     { label: "코드 스코프", hint: "코드 블록", snippet: "```\n\n```", cursorOffset: 4, openLangPicker: true },
     { label: "콜아웃", hint: "강조 인용구", snippet: "> 💡 " },
+    {
+      label: "접기/펼치기",
+      hint: "토글 블록",
+      snippet: DETAILS_SNIPPET,
+      cursorOffset: DETAILS_TITLE_OFFSET,
+      cursorSelectLength: DETAILS_TITLE_LEN,
+    },
   ];
 
   useEffect(() => {
@@ -204,14 +215,15 @@ export default function PostForm({ mode, slug, initial }: Props) {
     }
   }
 
-  function applyAtSlash(index: number, snippet: string, cursorOffset?: number) {
+  function applyAtSlash(index: number, snippet: string, cursorOffset?: number, cursorSelectLength = 0) {
     const el = textareaRef.current;
     if (el) {
       insertTextNative(el, index, index + 1, snippet);
       const pos = index + (cursorOffset ?? snippet.length);
       queueMicrotask(() => {
         el.focus();
-        el.selectionStart = el.selectionEnd = pos;
+        el.selectionStart = pos;
+        el.selectionEnd = pos + cursorSelectLength;
       });
     }
     setSlashMenu(null);
@@ -224,8 +236,24 @@ export default function PostForm({ mode, slug, initial }: Props) {
       setSlashMenu(null);
       return;
     }
-    applyAtSlash(slashMenu.index, cmd.snippet, cmd.cursorOffset);
+    applyAtSlash(slashMenu.index, cmd.snippet, cmd.cursorOffset, cmd.cursorSelectLength);
     if (cmd.openTable) setShowTableBuilder(true);
+  }
+
+  function insertDetailsBlock() {
+    const el = textareaRef.current;
+    if (!el) {
+      setContent((c) => c + DETAILS_SNIPPET + "\n");
+      return;
+    }
+    const start = el.selectionStart;
+    insertTextNative(el, start, el.selectionEnd, DETAILS_SNIPPET + "\n");
+    const titleStart = start + DETAILS_TITLE_OFFSET;
+    queueMicrotask(() => {
+      el.focus();
+      el.selectionStart = titleStart;
+      el.selectionEnd = titleStart + DETAILS_TITLE_LEN;
+    });
   }
 
   function applyCodeLang(lang: string) {
@@ -481,6 +509,13 @@ export default function PostForm({ mode, slug, initial }: Props) {
           className="font-mono text-xs text-muted border border-border rounded px-2 py-1 hover:border-accent"
         >
           표 삽입
+        </button>
+        <button
+          type="button"
+          onClick={insertDetailsBlock}
+          className="font-mono text-xs text-muted border border-border rounded px-2 py-1 hover:border-accent"
+        >
+          접기/펼치기
         </button>
         <span className="font-mono text-xs text-muted">커서 위치에 마크다운으로 삽입됩니다</span>
       </div>

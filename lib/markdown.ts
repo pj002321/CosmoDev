@@ -2,6 +2,8 @@ import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import remarkRehype from "remark-rehype";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 import rehypeStringify from "rehype-stringify";
 import { all } from "lowlight";
@@ -10,7 +12,9 @@ export async function renderMarkdown(content: string): Promise<string> {
   const processed = await remark()
     .use(remarkGfm)
     .use(remarkBreaks)
-    .use(remarkRehype)
+    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeRaw)
+    .use(rehypeSanitize)
     .use(rehypeHighlight, { detect: true, languages: all })
     .use(rehypeStringify)
     .process(content ?? "");

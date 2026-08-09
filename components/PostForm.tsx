@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import TableBuilder from "@/components/TableBuilder";
 import type { PostStatus, PostVisibility } from "@/lib/posts";
+import { HIGHLIGHT_COLORS } from "@/lib/colors";
 
 type Initial = {
   title: string;
@@ -105,6 +106,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [unsplashLoading, setUnsplashLoading] = useState(false);
   const [slashMenu, setSlashMenu] = useState<SlashMenuState | null>(null);
   const [langMenu, setLangMenu] = useState<LangMenuState | null>(null);
+  const [colorMenu, setColorMenu] = useState<"text" | "bg" | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const slashCommands: { label: string; hint: string; snippet: string; cursorOffset?: number; cursorSelectLength?: number; openTable?: boolean; openLangPicker?: boolean }[] = [
@@ -114,6 +116,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
     { label: "제목 3", hint: "작은 제목", snippet: "### " },
     { label: "코드 스코프", hint: "코드 블록", snippet: "```\n\n```", cursorOffset: 4, openLangPicker: true },
     { label: "콜아웃", hint: "강조 인용구", snippet: "> 💡 " },
+    { label: "인용구", hint: "블록 인용", snippet: "> " },
     {
       label: "접기/펼치기",
       hint: "토글 블록",
@@ -204,6 +207,28 @@ export default function PostForm({ mode, slug, initial }: Props) {
       el.selectionStart = cursorStart;
       el.selectionEnd = cursorEnd;
     });
+  }
+
+  function wrapWithSpan(className: string) {
+    const el = textareaRef.current;
+    const open = `<span class="${className}">`;
+    const close = "</span>";
+    if (!el) {
+      setContent((c) => c + open + close);
+      return;
+    }
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const selected = el.value.slice(start, end);
+    insertTextNative(el, start, end, open + selected + close);
+    const cursorStart = start + open.length;
+    const cursorEnd = cursorStart + selected.length;
+    queueMicrotask(() => {
+      el.focus();
+      el.selectionStart = cursorStart;
+      el.selectionEnd = cursorEnd;
+    });
+    setColorMenu(null);
   }
 
   function insertAtCursor(insertion: string) {
@@ -477,6 +502,58 @@ export default function PostForm({ mode, slug, initial }: Props) {
         >
           S
         </button>
+        <div className="relative">
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setColorMenu((m) => (m === "text" ? null : "text"))}
+            title="글자색"
+            className="font-mono text-xs text-muted border border-border rounded px-2.5 py-1 hover:border-accent"
+          >
+            A
+          </button>
+          {colorMenu === "text" && (
+            <div className="absolute z-20 top-full mt-1 left-0 flex gap-1 bg-surface border border-border rounded p-1.5">
+              {HIGHLIGHT_COLORS.map((c) => (
+                <button
+                  key={c.name}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => wrapWithSpan(`text-hl-${c.name}`)}
+                  title={c.name}
+                  className="w-5 h-5 rounded-full border border-border"
+                  style={{ background: c.hex }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="relative">
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setColorMenu((m) => (m === "bg" ? null : "bg"))}
+            title="배경색"
+            className="font-mono text-xs text-muted border border-border rounded px-2.5 py-1 hover:border-accent"
+          >
+            <span className="px-0.5 bg-accent/30 rounded-sm">A</span>
+          </button>
+          {colorMenu === "bg" && (
+            <div className="absolute z-20 top-full mt-1 left-0 flex gap-1 bg-surface border border-border rounded p-1.5">
+              {HIGHLIGHT_COLORS.map((c) => (
+                <button
+                  key={c.name}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => wrapWithSpan(`bg-hl-${c.name}`)}
+                  title={c.name}
+                  className="w-5 h-5 rounded-full border border-border"
+                  style={{ background: c.hex }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
         <span className="w-px h-4 bg-border" />
         <label className="font-mono text-xs text-muted border border-border rounded px-2 py-1 cursor-pointer hover:border-accent">
           {uploading ? "업로드 중…" : "이미지 삽입"}

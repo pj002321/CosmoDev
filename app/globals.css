@@ -600,10 +600,31 @@ header a:not(.btn-accent):hover::after {
   border-radius: 0;
   background: var(--surface);
   padding: 0.85rem 1rem;
-  color: var(--muted);
-  font-style: italic;
   margin: 1.25rem 0;
 }
+
+.prose-post .text-hl-red { color: #f87171; }
+.prose-post .text-hl-orange { color: #fb923c; }
+.prose-post .text-hl-yellow { color: #facc15; }
+.prose-post .text-hl-green { color: #4ade80; }
+.prose-post .text-hl-blue { color: #60a5fa; }
+.prose-post .text-hl-purple { color: #c084fc; }
+
+.prose-post .bg-hl-red,
+.prose-post .bg-hl-orange,
+.prose-post .bg-hl-yellow,
+.prose-post .bg-hl-green,
+.prose-post .bg-hl-blue,
+.prose-post .bg-hl-purple {
+  padding: 0.05rem 0.25rem;
+  border-radius: 0.2rem;
+}
+.prose-post .bg-hl-red { background: color-mix(in srgb, #f87171 30%, transparent); }
+.prose-post .bg-hl-orange { background: color-mix(in srgb, #fb923c 30%, transparent); }
+.prose-post .bg-hl-yellow { background: color-mix(in srgb, #facc15 30%, transparent); }
+.prose-post .bg-hl-green { background: color-mix(in srgb, #4ade80 30%, transparent); }
+.prose-post .bg-hl-blue { background: color-mix(in srgb, #60a5fa 30%, transparent); }
+.prose-post .bg-hl-purple { background: color-mix(in srgb, #c084fc 30%, transparent); }
 
 .prose-post table {
   width: 100%;

@@ -9,6 +9,8 @@ type Post = {
   title: string;
   date: string;
   tags: string[];
+  status: "draft" | "published";
+  visibility: "public" | "private";
 };
 
 const UNCATEGORIZED = "미분류";
@@ -73,6 +75,16 @@ export default function MyPostsExplorer({ posts }: { posts: Post[] }) {
                   <div>
                     <span className="font-mono text-xs text-muted mr-3">{post.date}</span>
                     <span className="font-medium">{post.title}</span>
+                    {post.status === "draft" && (
+                      <span className="ml-2 font-mono text-[10px] text-muted border border-border rounded px-1.5 py-0.5">
+                        임시저장
+                      </span>
+                    )}
+                    {post.visibility === "private" && (
+                      <span className="ml-2 font-mono text-[10px] text-muted border border-border rounded px-1.5 py-0.5">
+                        비공개
+                      </span>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Link

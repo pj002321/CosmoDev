@@ -26,6 +26,8 @@ export default async function EditPostPage({
           summary: post.summary,
           tags: post.tags,
           content: post.content,
+          status: post.status,
+          visibility: post.visibility,
         }}
       />
     </div>

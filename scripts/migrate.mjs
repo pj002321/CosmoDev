@@ -38,6 +38,14 @@ await sql`
 `;
 
 await sql`
+  ALTER TABLE posts ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'published'
+`;
+
+await sql`
+  ALTER TABLE posts ADD COLUMN IF NOT EXISTS visibility text NOT NULL DEFAULT 'public'
+`;
+
+await sql`
   CREATE TABLE IF NOT EXISTS follows (
     follower_id text NOT NULL,
     followee_id text NOT NULL,

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import TableBuilder from "@/components/TableBuilder";
+import type { PostStatus, PostVisibility } from "@/lib/posts";
 
 type Initial = {
   title: string;
@@ -10,6 +11,8 @@ type Initial = {
   summary: string;
   tags: string[];
   content: string;
+  status: PostStatus;
+  visibility: PostVisibility;
 };
 
 type Props = {
@@ -82,6 +85,11 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [summary, setSummary] = useState(initial?.summary ?? "");
   const [tags, setTags] = useState(initial?.tags.join(", ") ?? "");
   const [content, setContent] = useState(initial?.content ?? "");
+  const [visibility, setVisibility] = useState<PostVisibility>(initial?.visibility ?? "public");
+  const [currentSlug, setCurrentSlug] = useState(slug);
+  const [persistedStatus, setPersistedStatus] = useState<PostStatus | null>(initial?.status ?? null);
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const [autosaving, setAutosaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -130,6 +138,21 @@ export default function PostForm({ mode, slug, initial }: Props) {
     }, 400);
     return () => clearTimeout(timer);
   }, [content]);
+
+  // ponytail: never autosave over an already-published post — a background
+  // save could silently alter live content mid-edit. Once persistedStatus
+  // becomes "published" (via the 발행 button), autosave stops; only an
+  // explicit save can touch it again.
+  useEffect(() => {
+    if (persistedStatus === "published") return;
+    if (!title.trim() || !content.trim()) return;
+    const timer = setTimeout(() => {
+      setAutosaving(true);
+      persist("draft").finally(() => setAutosaving(false));
+    }, 3000);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, date, summary, tags, content, visibility, persistedStatus]);
 
   // ponytail: execCommand is deprecated but it's still the only way to make a
   // programmatic textarea edit land on the browser's native undo stack
@@ -308,33 +331,58 @@ export default function PostForm({ mode, slug, initial }: Props) {
     setShowTableBuilder(false);
   }
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    setError("");
+  async function persist(nextStatus: PostStatus): Promise<boolean> {
+    const payload = {
+      title,
+      date,
+      summary,
+      tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+      content,
+      status: nextStatus,
+      visibility,
+    };
     try {
-      const payload = {
-        title,
-        date,
-        summary,
-        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-        content,
-      };
       const res = await fetch(
-        mode === "new" ? "/api/posts" : `/api/posts/${slug}`,
+        currentSlug ? `/api/posts/${currentSlug}` : "/api/posts",
         {
-          method: mode === "new" ? "POST" : "PUT",
+          method: currentSlug ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         }
       );
-      if (!res.ok) throw new Error("save failed");
+      if (!res.ok) return false;
+      if (!currentSlug) {
+        const { slug: newSlug } = await res.json();
+        setCurrentSlug(newSlug);
+      }
+      setPersistedStatus(nextStatus);
+      setSavedAt(new Date());
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    const ok = await persist("published");
+    if (ok) {
       router.push("/my-posts");
       router.refresh();
-    } catch {
+    } else {
       setError("저장에 실패했습니다.");
       setSaving(false);
     }
+  }
+
+  async function handleDraftSave() {
+    setSaving(true);
+    setError("");
+    const ok = await persist("draft");
+    setSaving(false);
+    if (!ok) setError("저장에 실패했습니다.");
   }
 
   return (
@@ -442,7 +490,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
       )}
 
       {showUnsplash && (
-        <div className="border border-border rounded p-3 flex flex-col gap-3">
+        <div className="bg-surface border border-border rounded p-3 flex flex-col gap-3">
           <input
             autoFocus
             value={unsplashQuery}
@@ -523,7 +571,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
             </div>
           )}
         </div>
-        <div className="border border-border rounded px-4 py-3 h-[36rem] overflow-y-auto">
+        <div className="bg-surface border border-border rounded px-4 py-3 h-[36rem] overflow-y-auto">
           {previewHtml ? (
             <div className="prose-post" dangerouslySetInnerHTML={{ __html: previewHtml }} />
           ) : (
@@ -532,13 +580,52 @@ export default function PostForm({ mode, slug, initial }: Props) {
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={saving}
-        className="btn-accent self-start font-medium rounded px-4 py-2 disabled:opacity-50"
-      >
-        {saving ? "저장 중…" : mode === "new" ? "발행" : "수정 저장"}
-      </button>
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex border border-border rounded overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setVisibility("public")}
+            className={`font-mono text-xs px-3 py-1.5 ${
+              visibility === "public" ? "bg-accent text-background" : "text-muted hover:text-accent"
+            }`}
+          >
+            공개
+          </button>
+          <button
+            type="button"
+            onClick={() => setVisibility("private")}
+            className={`font-mono text-xs px-3 py-1.5 border-l border-border ${
+              visibility === "private" ? "bg-accent text-background" : "text-muted hover:text-accent"
+            }`}
+          >
+            비공개
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleDraftSave}
+          disabled={saving}
+          className="font-mono text-xs border border-border rounded px-3 py-1.5 hover:border-accent disabled:opacity-50"
+        >
+          임시저장
+        </button>
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="btn-accent font-medium rounded px-4 py-2 disabled:opacity-50"
+        >
+          {saving ? "저장 중…" : mode === "new" ? "발행" : "수정 저장"}
+        </button>
+
+        {autosaving && <span className="font-mono text-xs text-muted">자동 저장 중…</span>}
+        {!autosaving && savedAt && (
+          <span className="font-mono text-xs text-muted">
+            {savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} 자동 저장됨
+          </span>
+        )}
+      </div>
     </form>
   );
 }

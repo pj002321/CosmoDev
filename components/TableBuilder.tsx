@@ -95,7 +95,7 @@ export default function TableBuilder({
   }
 
   return (
-    <div className="border border-border rounded p-3 flex flex-col gap-3">
+    <div className="bg-surface border border-border rounded p-3 flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <button type="button" onClick={addRow} className={btnClass}>
           + 행 추가

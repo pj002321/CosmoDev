@@ -67,13 +67,8 @@ function rand(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
-// ponytail: assumes a ~16:10 viewport to tilt the streak so it visually
-// points along its travel vector. The landing spot itself is exact (vw/vh
-// translate matches the target star's own % position 1:1, since .starfield
-// fills the viewport) — this constant only affects how "straight" the tilt
-// looks on unusually wide/narrow screens. Upgrade: measure real aspect
-// ratio client-side if that ever looks off.
-const ASSUMED_ASPECT = 1.6;
+const COMET_TRAIL_LAGS = [0, 0.045, 0.09, 0.135];
+const COMET_TRAIL_OPACITIES = [1, 0.55, 0.3, 0.12];
 
 // Regenerated per request (layout is dynamic via cookies()), so every page
 // load gets a fresh random sky instead of the same fixed star layout.
@@ -89,7 +84,6 @@ function randomSky() {
 
   const dxPct = targetLeft - burstLeft;
   const dyPct = targetTop - burstTop;
-  const angle = -(Math.atan2(dyPct, -dxPct * ASSUMED_ASPECT) * 180) / Math.PI;
 
   const flareStars = Array.from({ length: FLARE_STAR_COUNT }, (_, i) =>
     i === targetIndex
@@ -111,21 +105,20 @@ function randomSky() {
       top: burstTop,
       duration: burstDuration,
       delay: burstDelay,
-      len: rand(90, 150),
       burst: true as const,
     },
   ];
 
   const burstStar = shootingStars[shootingStars.length - 1];
 
-  return { flareStars, shootingStars, burstStar, target: flareStars[targetIndex], dxPct, dyPct, angle };
+  return { flareStars, shootingStars, burstStar, target: flareStars[targetIndex], dxPct, dyPct };
 }
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const cookieStore = await cookies();
   const locale: Locale = cookieStore.get(LOCALE_COOKIE)?.value === "en" ? "en" : "ko";
   const dict = getDict(locale);
-  const { flareStars, shootingStars, burstStar, target, dxPct, dyPct, angle } = randomSky();
+  const { flareStars, shootingStars, burstStar, target, dxPct, dyPct } = randomSky();
 
   return (
     <html
@@ -149,23 +142,33 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               } as React.CSSProperties}
             />
           ))}
-          {shootingStars.map((s, i) => (
+          {shootingStars
+            .filter((s) => !s.burst)
+            .map((s, i) => (
+              <span
+                key={i}
+                className="shooting-star"
+                style={{
+                  left: `${s.left}%`,
+                  top: `${s.top}%`,
+                  animationDuration: `${s.duration.toFixed(2)}s`,
+                  animationDelay: `${s.delay.toFixed(2)}s`,
+                  "--len": `${s.len.toFixed(0)}px`,
+                } as React.CSSProperties}
+              />
+            ))}
+          {COMET_TRAIL_LAGS.map((lag, i) => (
             <span
-              key={i}
-              className={`shooting-star${s.burst ? " burst" : ""}`}
+              key={`comet-${i}`}
+              className={i === 0 ? "comet-head" : "comet-trail"}
               style={{
-                left: `${s.left}%`,
-                top: `${s.top}%`,
-                animationDuration: `${s.duration.toFixed(2)}s`,
-                animationDelay: `${s.delay.toFixed(2)}s`,
-                "--len": `${s.len.toFixed(0)}px`,
-                ...(s.burst
-                  ? {
-                      "--dx": `${dxPct.toFixed(2)}vw`,
-                      "--dy": `${dyPct.toFixed(2)}vh`,
-                      "--angle": `${angle.toFixed(1)}deg`,
-                    }
-                  : {}),
+                left: `${burstStar.left}%`,
+                top: `${burstStar.top}%`,
+                animationDuration: `${burstStar.duration.toFixed(2)}s`,
+                animationDelay: `${(burstStar.delay + lag).toFixed(3)}s`,
+                "--dx": `${dxPct.toFixed(2)}vw`,
+                "--dy": `${dyPct.toFixed(2)}vh`,
+                "--trail-opacity": COMET_TRAIL_OPACITIES[i],
               } as React.CSSProperties}
             />
           ))}

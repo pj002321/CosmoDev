@@ -1,6 +1,9 @@
 import { sql } from "@/lib/db";
 import { renderMarkdown } from "@/lib/markdown";
 
+export type PostStatus = "draft" | "published";
+export type PostVisibility = "public" | "private";
+
 export type PostMeta = {
   slug: string;
   title: string;
@@ -10,6 +13,8 @@ export type PostMeta = {
   authorId: string;
   authorName: string;
   views: number;
+  status: PostStatus;
+  visibility: PostVisibility;
 };
 
 export type PostInput = {
@@ -18,6 +23,8 @@ export type PostInput = {
   summary: string;
   tags: string[];
   content: string;
+  status: PostStatus;
+  visibility: PostVisibility;
 };
 
 type Row = {
@@ -29,6 +36,8 @@ type Row = {
   author_id: string;
   author_name: string;
   views: number;
+  status: PostStatus;
+  visibility: PostVisibility;
   content?: string;
 };
 
@@ -42,6 +51,8 @@ function toMeta(row: Row): PostMeta {
     authorId: row.author_id,
     authorName: row.author_name,
     views: row.views,
+    status: row.status,
+    visibility: row.visibility,
   };
 }
 
@@ -61,15 +72,16 @@ export function uniqueTags(posts: { tags: string[] }[]): string[] {
 
 export async function getAllPosts(): Promise<PostMeta[]> {
   const rows = (await sql()`
-    SELECT slug, title, date, summary, tags, author_id, author_name, views
-    FROM posts ORDER BY date DESC, created_at DESC
+    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility
+    FROM posts WHERE status = 'published' AND visibility = 'public'
+    ORDER BY date DESC, created_at DESC
   `) as Row[];
   return rows.map(toMeta);
 }
 
 export async function getPostsByAuthor(authorId: string): Promise<PostMeta[]> {
   const rows = (await sql()`
-    SELECT slug, title, date, summary, tags, author_id, author_name, views
+    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility
     FROM posts WHERE author_id = ${authorId} ORDER BY date DESC, created_at DESC
   `) as Row[];
   return rows.map(toMeta);
@@ -77,7 +89,7 @@ export async function getPostsByAuthor(authorId: string): Promise<PostMeta[]> {
 
 export async function getPost(slug: string) {
   const rows = (await sql()`
-    SELECT slug, title, date, summary, tags, author_id, author_name, views, content
+    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility, content
     FROM posts WHERE slug = ${slug} LIMIT 1
   `) as Row[];
   const row = rows[0];
@@ -101,8 +113,8 @@ export async function incrementViews(slug: string): Promise<number> {
 export async function createPost(input: PostInput, authorId: string, authorName: string) {
   const slug = slugify(input.title, input.date);
   await sql()`
-    INSERT INTO posts (slug, title, date, summary, tags, content, author_id, author_name)
-    VALUES (${slug}, ${input.title}, ${input.date}, ${input.summary}, ${input.tags}, ${input.content}, ${authorId}, ${authorName})
+    INSERT INTO posts (slug, title, date, summary, tags, content, author_id, author_name, status, visibility)
+    VALUES (${slug}, ${input.title}, ${input.date}, ${input.summary}, ${input.tags}, ${input.content}, ${authorId}, ${authorName}, ${input.status}, ${input.visibility})
   `;
   return slug;
 }
@@ -110,7 +122,7 @@ export async function createPost(input: PostInput, authorId: string, authorName:
 export async function updatePost(slug: string, input: PostInput, authorId: string) {
   const rows = (await sql()`
     UPDATE posts SET title = ${input.title}, date = ${input.date}, summary = ${input.summary},
-      tags = ${input.tags}, content = ${input.content}
+      tags = ${input.tags}, content = ${input.content}, status = ${input.status}, visibility = ${input.visibility}
     WHERE slug = ${slug} AND author_id = ${authorId}
     RETURNING slug
   `) as { slug: string }[];

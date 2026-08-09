@@ -11,6 +11,8 @@ type Post = {
   authorName?: string;
   likeCount?: number;
   views?: number;
+  status?: "draft" | "published";
+  visibility?: "public" | "private";
 };
 
 export default function PostCard({
@@ -45,10 +47,20 @@ export default function PostCard({
           <span className="font-mono text-xs text-muted">{post.date}</span>
         </span>
       </div>
-      <h2 className="text-lg font-medium mb-1 group-hover:text-accent transition-colors">
+      <h2 className="text-lg font-medium mb-1 group-hover:text-accent transition-colors flex items-center gap-2">
         <Link href={`/posts/${post.slug}`} className="after:absolute after:inset-0">
           {post.title}
         </Link>
+        {post.status === "draft" && (
+          <span className="relative z-10 font-mono text-[10px] text-muted border border-border rounded px-1.5 py-0.5 shrink-0">
+            임시저장
+          </span>
+        )}
+        {post.visibility === "private" && (
+          <span className="relative z-10 font-mono text-[10px] text-muted border border-border rounded px-1.5 py-0.5 shrink-0">
+            비공개
+          </span>
+        )}
       </h2>
       {showAuthor && post.authorName && post.authorId && (
         <Link

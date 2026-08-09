@@ -603,28 +603,43 @@ header a:not(.btn-accent):hover::after {
   margin: 1.25rem 0;
 }
 
+.prose-post .text-hl-white { color: #ffffff; }
+.prose-post .text-hl-black { color: #000000; }
+.prose-post .text-hl-gray { color: #9ca3af; }
 .prose-post .text-hl-red { color: #f87171; }
 .prose-post .text-hl-orange { color: #fb923c; }
 .prose-post .text-hl-yellow { color: #facc15; }
 .prose-post .text-hl-green { color: #4ade80; }
+.prose-post .text-hl-teal { color: #2dd4bf; }
 .prose-post .text-hl-blue { color: #60a5fa; }
 .prose-post .text-hl-purple { color: #c084fc; }
+.prose-post .text-hl-pink { color: #f472b6; }
 
+.prose-post .bg-hl-white,
+.prose-post .bg-hl-black,
+.prose-post .bg-hl-gray,
 .prose-post .bg-hl-red,
 .prose-post .bg-hl-orange,
 .prose-post .bg-hl-yellow,
 .prose-post .bg-hl-green,
+.prose-post .bg-hl-teal,
 .prose-post .bg-hl-blue,
-.prose-post .bg-hl-purple {
+.prose-post .bg-hl-purple,
+.prose-post .bg-hl-pink {
   padding: 0.05rem 0.25rem;
   border-radius: 0.2rem;
 }
+.prose-post .bg-hl-white { background: color-mix(in srgb, #ffffff 30%, transparent); }
+.prose-post .bg-hl-black { background: color-mix(in srgb, #000000 40%, transparent); }
+.prose-post .bg-hl-gray { background: color-mix(in srgb, #9ca3af 30%, transparent); }
 .prose-post .bg-hl-red { background: color-mix(in srgb, #f87171 30%, transparent); }
 .prose-post .bg-hl-orange { background: color-mix(in srgb, #fb923c 30%, transparent); }
 .prose-post .bg-hl-yellow { background: color-mix(in srgb, #facc15 30%, transparent); }
 .prose-post .bg-hl-green { background: color-mix(in srgb, #4ade80 30%, transparent); }
+.prose-post .bg-hl-teal { background: color-mix(in srgb, #2dd4bf 30%, transparent); }
 .prose-post .bg-hl-blue { background: color-mix(in srgb, #60a5fa 30%, transparent); }
 .prose-post .bg-hl-purple { background: color-mix(in srgb, #c084fc 30%, transparent); }
+.prose-post .bg-hl-pink { background: color-mix(in srgb, #f472b6 30%, transparent); }
 
 .prose-post table {
   width: 100%;

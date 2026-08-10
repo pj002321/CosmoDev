@@ -5,18 +5,22 @@ import { useState } from "react";
 const MIN_ROWS = 2; // header + at least one body row
 const MIN_COLS = 1;
 
+type Align = "left" | "center" | "right";
+
 function makeGrid(rows: number, cols: number): string[][] {
   return Array.from({ length: rows }, (_, r) =>
     Array.from({ length: cols }, (_, c) => (r === 0 ? `헤더${c + 1}` : ""))
   );
 }
 
-function toMarkdown(cells: string[][]): string {
+const ALIGN_DIVIDER: Record<Align, string> = { left: ":---", center: ":---:", right: "---:" };
+
+function toMarkdown(cells: string[][], aligns: Align[]): string {
   const escape = (s: string) => s.replace(/\|/g, "\\|").trim() || " ";
   const [header, ...body] = cells;
   const lines = [
     `| ${header.map(escape).join(" | ")} |`,
-    `| ${header.map(() => "---").join(" | ")} |`,
+    `| ${aligns.map((a) => ALIGN_DIVIDER[a]).join(" | ")} |`,
     ...body.map((row) => `| ${row.map(escape).join(" | ")} |`),
   ];
   return lines.join("\n") + "\n";
@@ -33,6 +37,7 @@ export default function TableBuilder({
   onClose: () => void;
 }) {
   const [cells, setCells] = useState<string[][]>(() => makeGrid(3, 3));
+  const [aligns, setAligns] = useState<Align[]>(() => Array(3).fill("left"));
   const [activeRow, setActiveRow] = useState(0);
   const [activeCol, setActiveCol] = useState(0);
 
@@ -68,13 +73,23 @@ export default function TableBuilder({
         return next;
       })
     );
+    setAligns((prev) => {
+      const next = [...prev];
+      next.splice(activeCol + offset, 0, "left");
+      return next;
+    });
     if (offset === 1) setActiveCol((c) => c + 1);
   }
 
   function deleteColumn() {
     if (colCount <= MIN_COLS) return;
     setCells((prev) => prev.map((row) => row.filter((_, j) => j !== activeCol)));
+    setAligns((prev) => prev.filter((_, j) => j !== activeCol));
     setActiveCol((c) => Math.min(c, colCount - 2));
+  }
+
+  function setActiveAlign(align: Align) {
+    setAligns((prev) => prev.map((a, j) => (j === activeCol ? align : a)));
   }
 
   function resize(rows: number, cols: number) {
@@ -88,6 +103,11 @@ export default function TableBuilder({
       });
       const next = withCols.slice(0, rows);
       while (next.length < rows) next.push(Array(cols).fill(""));
+      return next;
+    });
+    setAligns((prev) => {
+      const next = prev.slice(0, cols);
+      while (next.length < cols) next.push("left");
       return next;
     });
     setActiveRow((r) => Math.min(r, rows - 1));
@@ -113,6 +133,18 @@ export default function TableBuilder({
         <button type="button" onClick={deleteColumn} disabled={colCount <= MIN_COLS} className={btnClass}>
           열 삭제
         </button>
+        <span className="w-px h-4 bg-border" />
+        {(["left", "center", "right"] as const).map((a) => (
+          <button
+            key={a}
+            type="button"
+            onClick={() => setActiveAlign(a)}
+            title={`선택한 열 정렬: ${a === "left" ? "왼쪽" : a === "center" ? "가운데" : "오른쪽"}`}
+            className={`${btnClass} ${aligns[activeCol] === a ? "border-accent text-accent" : ""}`}
+          >
+            {a === "left" ? "◀ 정렬" : a === "center" ? "가운데" : "정렬 ▶"}
+          </button>
+        ))}
         <span className="w-px h-4 bg-border" />
         <label className="flex items-center gap-1 font-mono text-xs text-muted">
           행
@@ -150,6 +182,7 @@ export default function TableBuilder({
                         setActiveCol(c);
                       }}
                       onChange={(e) => updateCell(r, c, e.target.value)}
+                      style={{ textAlign: aligns[c] }}
                       className={`w-28 px-2 py-1 text-sm bg-surface outline-none focus:bg-background ${
                         r === 0 ? "font-medium" : ""
                       } ${r === activeRow && c === activeCol ? "ring-1 ring-accent" : ""}`}
@@ -165,7 +198,7 @@ export default function TableBuilder({
       <div className="flex items-center gap-2 flex-wrap">
         <button
           type="button"
-          onClick={() => onInsert(toMarkdown(cells))}
+          onClick={() => onInsert(toMarkdown(cells, aligns))}
           className="btn-accent font-mono text-xs rounded px-3 py-1.5"
         >
           표 삽입

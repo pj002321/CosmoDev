@@ -32,8 +32,12 @@ type UnsplashPhoto = {
   authorUrl: string;
 };
 
-type SlashMenuState = { index: number; top: number; left: number; active: number };
-type LangMenuState = { index: number; top: number; left: number };
+type MenuPos = { left: number; top?: number; bottom?: number; direction: "down" | "up" };
+type SlashMenuState = MenuPos & { index: number; active: number };
+type LangMenuState = MenuPos & { index: number };
+
+const SLASH_MENU_HEIGHT = 260; // 8 items * ~30px + padding, estimate
+const LANG_MENU_HEIGHT = 230; // capped by max-h-56, estimate
 
 const DETAILS_SNIPPET = "<details>\n<summary>제목</summary>\n\n내용\n\n</details>";
 const DETAILS_TITLE_OFFSET = "<details>\n<summary>".length;
@@ -56,7 +60,7 @@ const CODE_LANGS: { label: string; lang: string }[] = [
 // ponytail: approximates caret pixel position via a mirrored offscreen div
 // (no textarea caret-coordinate API exists). Good enough for menu placement,
 // not pixel-perfect on window resize.
-function getCaretCoords(el: HTMLTextAreaElement, pos: number) {
+function getCaretLine(el: HTMLTextAreaElement, pos: number) {
   const div = document.createElement("div");
   const style = window.getComputedStyle(el);
   const props = [
@@ -77,10 +81,23 @@ function getCaretCoords(el: HTMLTextAreaElement, pos: number) {
   span.textContent = el.value.slice(pos) || ".";
   div.appendChild(span);
   const lineHeight = parseFloat(style.lineHeight) || 20;
-  const top = span.offsetTop - el.scrollTop + lineHeight;
+  const lineTop = span.offsetTop - el.scrollTop;
   const left = span.offsetLeft - el.scrollLeft;
   document.body.removeChild(div);
-  return { top, left };
+  return { lineTop, lineHeight, left };
+}
+
+// Flips the dropdown above the caret line when there isn't enough viewport
+// space below it (e.g. typing "/" near the bottom of the editor/page).
+function placeMenu(el: HTMLTextAreaElement, pos: number, menuHeight: number): MenuPos {
+  const { lineTop, lineHeight, left } = getCaretLine(el, pos);
+  const rect = el.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - (rect.top + lineTop + lineHeight);
+  const spaceAbove = rect.top + lineTop;
+  const direction: "down" | "up" = spaceBelow < menuHeight && spaceAbove > spaceBelow ? "up" : "down";
+  return direction === "down"
+    ? { direction, left, top: lineTop + lineHeight }
+    : { direction, left, bottom: el.clientHeight - lineTop };
 }
 
 export default function PostForm({ mode, slug, initial }: Props) {
@@ -257,7 +274,12 @@ export default function PostForm({ mode, slug, initial }: Props) {
   function runSlashCommand(cmd: (typeof slashCommands)[number]) {
     if (!slashMenu) return;
     if (cmd.openLangPicker) {
-      setLangMenu({ index: slashMenu.index, top: slashMenu.top, left: slashMenu.left });
+      const el = textareaRef.current;
+      const pos = slashMenu.index + 1;
+      setLangMenu({
+        index: slashMenu.index,
+        ...(el ? placeMenu(el, pos, LANG_MENU_HEIGHT) : { left: slashMenu.left, top: slashMenu.top, bottom: slashMenu.bottom, direction: slashMenu.direction }),
+      });
       setSlashMenu(null);
       return;
     }
@@ -297,8 +319,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
     const justTyped = next[pos - 1];
     const before = pos >= 2 ? next[pos - 2] : undefined;
     if (justTyped === "/" && (pos === 1 || before === "\n")) {
-      const { top, left } = getCaretCoords(el, pos);
-      setSlashMenu({ index: pos - 1, top, left, active: 0 });
+      setSlashMenu({ index: pos - 1, active: 0, ...placeMenu(el, pos, SLASH_MENU_HEIGHT) });
     } else if (slashMenu) {
       setSlashMenu(null);
     }
@@ -306,6 +327,25 @@ export default function PostForm({ mode, slug, initial }: Props) {
   }
 
   function handleContentKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    const mod = e.metaKey || e.ctrlKey;
+    if (mod && !e.altKey) {
+      const key = e.key.toLowerCase();
+      if (key === "b") {
+        e.preventDefault();
+        wrapSelection("**");
+        return;
+      }
+      if (key === "i") {
+        e.preventDefault();
+        wrapSelection("*");
+        return;
+      }
+      if (e.shiftKey && key === "x") {
+        e.preventDefault();
+        wrapSelection("~~");
+        return;
+      }
+    }
     if (langMenu) {
       if (e.key === "Escape") {
         e.preventDefault();
@@ -479,7 +519,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => wrapSelection("**")}
-          title="굵게"
+          title="굵게 (Ctrl/Cmd+B)"
           className="font-mono text-xs font-bold text-muted border border-border rounded px-2.5 py-1 hover:border-accent"
         >
           B
@@ -488,7 +528,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => wrapSelection("*")}
-          title="기울임"
+          title="기울임 (Ctrl/Cmd+I)"
           className="font-mono text-xs italic text-muted border border-border rounded px-2.5 py-1 hover:border-accent"
         >
           I
@@ -497,7 +537,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => wrapSelection("~~")}
-          title="취소선"
+          title="취소선 (Ctrl/Cmd+Shift+X)"
           className="font-mono text-xs line-through text-muted border border-border rounded px-2.5 py-1 hover:border-accent"
         >
           S
@@ -645,7 +685,11 @@ export default function PostForm({ mode, slug, initial }: Props) {
           {slashMenu && (
             <div
               className="absolute z-20 w-44 bg-surface border border-border rounded shadow-lg py-1 font-mono text-xs"
-              style={{ top: slashMenu.top, left: slashMenu.left }}
+              style={
+                slashMenu.direction === "down"
+                  ? { top: slashMenu.top, left: slashMenu.left }
+                  : { bottom: slashMenu.bottom, left: slashMenu.left }
+              }
             >
               {slashCommands.map((cmd, i) => (
                 <button
@@ -667,7 +711,11 @@ export default function PostForm({ mode, slug, initial }: Props) {
           {langMenu && (
             <div
               className="absolute z-20 w-40 bg-surface border border-border rounded shadow-lg py-1 font-mono text-xs max-h-56 overflow-y-auto"
-              style={{ top: langMenu.top, left: langMenu.left }}
+              style={
+                langMenu.direction === "down"
+                  ? { top: langMenu.top, left: langMenu.left }
+                  : { bottom: langMenu.bottom, left: langMenu.left }
+              }
             >
               {CODE_LANGS.map((l) => (
                 <button

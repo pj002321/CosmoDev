@@ -104,3 +104,11 @@ export function MoonIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+export function CommentIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M21 12c0 4.4-4 8-9 8-1.3 0-2.6-.2-3.7-.7L3 21l1.3-4.1C3.5 15.6 3 13.9 3 12c0-4.4 4-8 9-8s9 3.6 9 8z" />
+    </svg>
+  );
+}

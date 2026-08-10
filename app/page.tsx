@@ -48,6 +48,12 @@ export default async function Home() {
             >
               {getDict(locale).nav.signup}
             </Link>
+            <Link
+              href="/explore"
+              className="font-mono text-xs border border-border rounded px-3 py-2 hover:border-accent"
+            >
+              {getDict(locale).nav.explore}
+            </Link>
           </div>
         </div>
       </div>

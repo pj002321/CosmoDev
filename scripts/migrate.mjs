@@ -55,4 +55,15 @@ await sql`
   )
 `;
 
+await sql`
+  CREATE TABLE IF NOT EXISTS comments (
+    id serial PRIMARY KEY,
+    post_slug text NOT NULL REFERENCES posts(slug) ON DELETE CASCADE,
+    author_id text NOT NULL,
+    author_name text NOT NULL,
+    content text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )
+`;
+
 console.log("migrated");

@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getPost, incrementViews } from "@/lib/posts";
 import { getLikeState } from "@/lib/likes";
+import { getComments } from "@/lib/comments";
 import { EyeIcon } from "@/components/icons";
 import DeletePostButton from "@/components/DeletePostButton";
 import LikeButton from "@/components/LikeButton";
+import CommentSection from "@/components/CommentSection";
 import PostWidthToggle from "@/components/PostWidthToggle";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +22,11 @@ export default async function PostPage({
   if (!post) notFound();
   const isOwner = post.authorId === userId;
   if (!isOwner && (post.status !== "published" || post.visibility !== "public")) notFound();
-  const [views, likeState] = await Promise.all([incrementViews(slug), getLikeState(slug, userId)]);
+  const [views, likeState, comments] = await Promise.all([
+    incrementViews(slug),
+    getLikeState(slug, userId),
+    getComments(slug),
+  ]);
 
   return (
     <PostWidthToggle
@@ -78,6 +84,13 @@ export default async function PostPage({
         <div
           className="prose-post"
           dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+        />
+
+        <CommentSection
+          slug={post.slug}
+          initialComments={comments}
+          signedIn={!!userId}
+          currentUserId={userId}
         />
       </div>
     </PostWidthToggle>

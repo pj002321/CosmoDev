@@ -261,7 +261,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   </span>
                 </Show>
                 <Show when="signed-out">
-                  <span className="font-mono text-xs text-muted mr-2">{dict.nav.tagline}</span>
+                  <Link
+                    href="/explore"
+                    className="flex items-center gap-1.5 font-mono text-xs text-muted hover:text-accent px-2.5 py-1.5 rounded hover:bg-surface transition-colors"
+                  >
+                    <CompassIcon className="w-3.5 h-3.5" />
+                    {dict.nav.explore}
+                  </Link>
+                  <span className="font-mono text-xs text-muted mx-2">{dict.nav.tagline}</span>
                   <Link
                     href="/sign-in"
                     className="font-mono text-xs text-muted hover:text-accent px-2.5 py-1.5 rounded hover:bg-surface transition-colors"

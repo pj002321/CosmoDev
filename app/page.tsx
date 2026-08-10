@@ -2,10 +2,11 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { getPostsByAuthor, uniqueTags } from "@/lib/posts";
-import { getTagline } from "@/lib/profiles";
+import { getTagline, getBannerUrl, getBannerPosition } from "@/lib/profiles";
 import { getLikeCounts } from "@/lib/likes";
 import EditableTagline from "@/components/profile/EditableTagline";
 import PostFilter from "@/components/post/PostFilter";
+import BannerUpload from "@/components/profile/BannerUpload";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
@@ -65,10 +66,13 @@ export default async function Home() {
   const posts = rawPosts.map((p) => ({ ...p, likeCount: likeCounts[p.slug] ?? 0 }));
   const tagline = (await getTagline(userId)) ?? dict.defaultTagline;
   const categories = uniqueTags(posts);
+  const [bannerUrl, bannerPosition] = await Promise.all([getBannerUrl(userId), getBannerPosition(userId)]);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
-      <div className="flex items-center justify-between mb-10">
+      <BannerUpload bannerUrl={bannerUrl} bannerPosition={bannerPosition} editable />
+
+      <div className="flex items-center justify-between mb-10 mt-6">
         <div>
           <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ {dict.archive}</p>
           <EditableTagline initialValue={tagline} />

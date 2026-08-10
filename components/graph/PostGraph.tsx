@@ -19,6 +19,7 @@ type Node = SimulationNodeDatum & {
   label: string;
   kind: "tag" | "post";
   slug?: string;
+  weight: number;
 };
 
 type Link = { source: string | Node; target: string | Node };
@@ -39,8 +40,14 @@ function tagColor(label: string) {
   return `hsl(${hue} 75% 65%)`;
 }
 
+// tag vertices grow with how many posts carry that tag, so heavily-used
+// tags read as hubs at a glance (capped so one giant tag can't dominate)
+function tagRadius(weight: number) {
+  return Math.min(20, 5 + weight * 2.2);
+}
+
 function buildGraph(posts: Post[]) {
-  const tagIds = new Set<string>();
+  const tagNodes = new Map<string, Node>();
   const nodes: Node[] = [];
   const links: Link[] = [];
 
@@ -48,13 +55,16 @@ function buildGraph(posts: Post[]) {
     const tags = post.tags.length > 0 ? post.tags : [UNCATEGORIZED];
     for (const tag of tags) {
       const tagId = `tag:${tag}`;
-      if (!tagIds.has(tagId)) {
-        tagIds.add(tagId);
-        nodes.push({ id: tagId, label: tag, kind: "tag" });
+      let tagNode = tagNodes.get(tagId);
+      if (!tagNode) {
+        tagNode = { id: tagId, label: tag, kind: "tag", weight: 0 };
+        tagNodes.set(tagId, tagNode);
+        nodes.push(tagNode);
       }
+      tagNode.weight += 1;
       links.push({ source: tagId, target: post.slug });
     }
-    nodes.push({ id: post.slug, label: post.title, kind: "post", slug: post.slug });
+    nodes.push({ id: post.slug, label: post.title, kind: "post", slug: post.slug, weight: 1 });
   }
 
   return { nodes, links };
@@ -90,7 +100,7 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
       )
       .force("charge", forceManyBody().strength(-55))
       .force("center", forceCenter(0, 0))
-      .force("collide", forceCollide<Node>((n) => (n.kind === "tag" ? 20 : 12)))
+      .force("collide", forceCollide<Node>((n) => (n.kind === "tag" ? tagRadius(n.weight) + 6 : 12)))
       .on("tick", () => {
         const halfW = viewW / 2 - 24;
         const halfH = viewH / 2 - 24;
@@ -208,13 +218,14 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
             className={n.slug ? "cursor-pointer" : "cursor-grab"}
           >
             <circle
-              r={isTag ? 5.5 : 3}
+              r={isTag ? tagRadius(n.weight) : 3}
               fill={isTag ? color : "var(--surface)"}
               stroke={isTag ? "none" : "var(--muted)"}
               strokeWidth={isTag ? 0 : 1}
+              style={isTag ? { filter: `drop-shadow(0 0 ${4 + n.weight}px ${color})` } : undefined}
             />
             <text
-              x={isTag ? 8 : 5.5}
+              x={isTag ? tagRadius(n.weight) + 3 : 5.5}
               y={2.8}
               fontSize={isTag ? 8 : 7}
               fontFamily="var(--font-mono)"

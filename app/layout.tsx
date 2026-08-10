@@ -6,8 +6,10 @@ import { ClerkProvider, Show, SignOutButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { GraphIcon, LogoutIcon, ListIcon, PencilIcon, CompassIcon, SettingsIcon } from "@/components/icons";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import ThemeToggle from "@/components/ThemeToggle";
 import UserMenu from "@/components/UserMenu";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
+import { THEME_COOKIE, defaultTheme, type Theme } from "@/lib/theme";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -118,11 +120,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const cookieStore = await cookies();
   const locale: Locale = cookieStore.get(LOCALE_COOKIE)?.value === "en" ? "en" : "ko";
   const dict = getDict(locale);
+  const theme: Theme = cookieStore.get(THEME_COOKIE)?.value === "light" ? "light" : defaultTheme;
   const { flareStars, shootingStars, burstStar, target, dxPct, dyPct } = randomSky();
 
   return (
     <html
       lang={locale}
+      data-theme={theme}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
@@ -274,13 +278,36 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <span className="ml-1.5 border-l border-border pl-3">
                   <LocaleSwitcher locale={locale} />
                 </span>
+                <ThemeToggle theme={theme} />
               </div>
             </div>
           </header>
           <main className="flex-1">{children}</main>
           <footer className="border-t border-border">
             <div className="mx-auto max-w-3xl px-6 py-8 font-mono text-xs text-muted flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <span>{dict.footer}</span>
+              <span className="flex flex-col gap-1">
+                {dict.footer}
+                <span className="photo-credit">
+                  Photo by{" "}
+                  <a
+                    href="https://unsplash.com/@mosiknife?utm_source=devshot&utm_medium=referral"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-accent transition-colors"
+                  >
+                    mosi knife
+                  </a>{" "}
+                  on{" "}
+                  <a
+                    href="https://unsplash.com/?utm_source=devshot&utm_medium=referral"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-accent transition-colors"
+                  >
+                    Unsplash
+                  </a>
+                </span>
+              </span>
               <nav className="flex flex-wrap gap-4">
                 <Link href="/" className="hover:text-accent transition-colors">
                   {dict.nav.home}

@@ -91,6 +91,14 @@ export async function getPostsByAuthor(authorId: string): Promise<PostMeta[]> {
   return rows.map(toMeta);
 }
 
+export async function getPostOwner(slug: string): Promise<{ authorId: string; title: string } | null> {
+  const rows = (await sql()`
+    SELECT author_id, title FROM posts WHERE slug = ${slug} LIMIT 1
+  `) as { author_id: string; title: string }[];
+  const row = rows[0];
+  return row ? { authorId: row.author_id, title: row.title } : null;
+}
+
 export async function getPost(slug: string) {
   const rows = (await sql()`
     SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility, thumbnail, content

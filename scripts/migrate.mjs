@@ -78,4 +78,22 @@ await sql`
   ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_position integer NOT NULL DEFAULT 50
 `;
 
+await sql`
+  CREATE TABLE IF NOT EXISTS notifications (
+    id serial PRIMARY KEY,
+    recipient_id text NOT NULL,
+    actor_id text NOT NULL,
+    actor_name text NOT NULL,
+    type text NOT NULL,
+    post_slug text,
+    post_title text,
+    read boolean NOT NULL DEFAULT false,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )
+`;
+
+await sql`
+  CREATE INDEX IF NOT EXISTS notifications_recipient_idx ON notifications (recipient_id, created_at DESC)
+`;
+
 console.log("migrated");

@@ -71,7 +71,7 @@ export default async function ProfilePage({
             className="flex items-center gap-1.5 font-mono text-xs border border-border rounded px-2 py-1.5 hover:border-accent"
           >
             <GraphIcon className="w-3.5 h-3.5" />
-            그래프
+            스페이스
           </Link>
           {userId && userId !== id && (
             <FollowButton followeeId={id} followeeName={posts[0].authorName} initialFollowing={following} />

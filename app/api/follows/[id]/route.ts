@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { follow, unfollow } from "@/lib/follows";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(
   req: NextRequest,
@@ -20,6 +21,11 @@ export async function POST(
   }
 
   await follow(userId, followeeId, name);
+
+  const user = await currentUser();
+  const actorName = user?.fullName || user?.username || user?.emailAddresses[0]?.emailAddress || "익명";
+  await createNotification(followeeId, userId, actorName, "follow");
+
   return NextResponse.json({ following: true });
 }
 

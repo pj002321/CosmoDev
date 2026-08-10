@@ -76,7 +76,15 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
       .force("charge", forceManyBody().strength(-120))
       .force("center", forceCenter(0, 0))
       .force("collide", forceCollide<Node>((n) => (n.kind === "tag" ? 20 : 12)))
-      .on("tick", () => bump((t) => t + 1));
+      .on("tick", () => {
+        const halfW = viewW / 2 - 24;
+        const halfH = viewH / 2 - 24;
+        for (const n of nodes) {
+          n.x = Math.max(-halfW, Math.min(halfW, n.x ?? 0));
+          n.y = Math.max(-halfH, Math.min(halfH, n.y ?? 0));
+        }
+        bump((t) => t + 1);
+      });
     simRef.current = sim;
     return () => {
       sim.stop();

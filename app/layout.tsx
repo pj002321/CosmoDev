@@ -8,6 +8,7 @@ import { GraphIcon, LogoutIcon, ListIcon, PencilIcon, CompassIcon, SettingsIcon 
 import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 import ThemeToggle from "@/components/layout/ThemeToggle";
 import UserMenu from "@/components/layout/UserMenu";
+import NotificationBell from "@/components/layout/NotificationBell";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 import { THEME_COOKIE, defaultTheme, type Theme } from "@/lib/theme";
 import { FLOAT_COOKIE, defaultFloat, type FloatSetting } from "@/lib/floatSetting";
@@ -260,6 +261,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                       {dict.nav.logout}
                     </button>
                   </SignOutButton>
+                  <NotificationBell />
                   <span className="ml-1 border-l border-border pl-3">
                     <UserMenu settingsLabel={dict.nav.settings} friendsLabel={dict.nav.friends} />
                   </span>

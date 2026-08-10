@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getComments, addComment } from "@/lib/comments";
+import { getPostOwner } from "@/lib/posts";
+import { createNotification } from "@/lib/notifications";
 
 export async function GET(
   _req: NextRequest,
@@ -27,5 +29,11 @@ export async function POST(
   const user = await currentUser();
   const authorName = user?.fullName || user?.username || user?.emailAddresses[0]?.emailAddress || "익명";
   const comment = await addComment(slug, userId, authorName, content.trim());
+
+  const owner = await getPostOwner(slug);
+  if (owner) {
+    await createNotification(owner.authorId, userId, authorName, "comment", slug, owner.title);
+  }
+
   return NextResponse.json({ comment });
 }

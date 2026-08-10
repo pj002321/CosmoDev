@@ -2,15 +2,18 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import PostCard from "@/components/post/PostCard";
 import DeletePostButton from "@/components/post/DeletePostButton";
 
 type Post = {
   slug: string;
   title: string;
   date: string;
+  summary: string;
   tags: string[];
   status: "draft" | "published";
   visibility: "public" | "private";
+  thumbnail?: string | null;
 };
 
 const UNCATEGORIZED = "미분류";
@@ -30,9 +33,7 @@ export default function MyPostsExplorer({ posts }: { posts: Post[] }) {
 
   const [active, setActive] = useState<string | null>(null);
 
-  const sections = active
-    ? categories.filter(([tag]) => tag === active)
-    : categories;
+  const filtered = active ? posts.filter((p) => p.tags.includes(active)) : posts;
 
   return (
     <div className="flex gap-6">
@@ -59,47 +60,30 @@ export default function MyPostsExplorer({ posts }: { posts: Post[] }) {
         ))}
       </nav>
 
-      <div className="flex-1 min-w-0 flex flex-col gap-8">
+      <div className="flex-1 min-w-0">
         {posts.length === 0 && (
           <p className="text-sm text-muted">아직 작성한 글이 없습니다.</p>
         )}
-        {sections.map(([tag, tagPosts]) => (
-          <section key={tag}>
-            <h2 className="font-mono text-xs text-muted mb-3"># {tag}</h2>
-            <div className="flex flex-col gap-3">
-              {tagPosts.map((post) => (
-                <div
-                  key={`${tag}-${post.slug}`}
-                  className="flex items-center justify-between border border-border rounded-lg p-4 bg-surface"
-                >
-                  <div>
-                    <span className="font-mono text-xs text-muted mr-3">{post.date}</span>
-                    <span className="font-medium">{post.title}</span>
-                    {post.status === "draft" && (
-                      <span className="ml-2 font-mono text-[10px] text-muted border border-border rounded px-1.5 py-0.5">
-                        임시저장
-                      </span>
-                    )}
-                    {post.visibility === "private" && (
-                      <span className="ml-2 font-mono text-[10px] text-muted border border-border rounded px-1.5 py-0.5">
-                        비공개
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/write/${post.slug}/edit`}
-                      className="font-mono text-xs border border-border rounded px-2 py-1 hover:border-accent"
-                    >
-                      수정
-                    </Link>
-                    <DeletePostButton slug={post.slug} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {filtered.map((post, i) => (
+            <PostCard
+              key={post.slug}
+              post={post}
+              index={i}
+              actions={
+                <>
+                  <Link
+                    href={`/write/${post.slug}/edit`}
+                    className="font-mono text-xs border border-border rounded px-2 py-1 hover:border-accent"
+                  >
+                    수정
+                  </Link>
+                  <DeletePostButton slug={post.slug} />
+                </>
+              }
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -67,7 +67,7 @@ export default async function Home() {
   const categories = uniqueTags(posts);
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12">
+    <div className="mx-auto max-w-7xl px-6 py-12">
       <div className="flex items-center justify-between mb-10">
         <div>
           <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ {dict.archive}</p>

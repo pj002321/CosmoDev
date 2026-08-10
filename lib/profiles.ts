@@ -13,3 +13,17 @@ export async function setTagline(authorId: string, tagline: string): Promise<voi
     ON CONFLICT (author_id) DO UPDATE SET tagline = EXCLUDED.tagline
   `;
 }
+
+export async function getBannerUrl(authorId: string): Promise<string | null> {
+  const rows = (await sql()`
+    SELECT banner_url FROM profiles WHERE author_id = ${authorId} LIMIT 1
+  `) as { banner_url: string | null }[];
+  return rows[0]?.banner_url ?? null;
+}
+
+export async function setBannerUrl(authorId: string, bannerUrl: string): Promise<void> {
+  await sql()`
+    INSERT INTO profiles (author_id, tagline, banner_url) VALUES (${authorId}, '', ${bannerUrl})
+    ON CONFLICT (author_id) DO UPDATE SET banner_url = EXCLUDED.banner_url
+  `;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import TableBuilder from "@/components/editor/TableBuilder";
 import type { PostStatus, PostVisibility } from "@/lib/posts";
@@ -14,6 +14,7 @@ type Initial = {
   content: string;
   status: PostStatus;
   visibility: PostVisibility;
+  thumbnail: string | null;
 };
 
 type Props = {
@@ -108,6 +109,8 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [tags, setTags] = useState(initial?.tags.join(", ") ?? "");
   const [content, setContent] = useState(initial?.content ?? "");
   const [visibility, setVisibility] = useState<PostVisibility>(initial?.visibility ?? "public");
+  const [thumbnail, setThumbnailRaw] = useState<string | null>(initial?.thumbnail ?? null);
+  const [thumbnailTouched, setThumbnailTouched] = useState(!!initial?.thumbnail);
   const [currentSlug, setCurrentSlug] = useState(slug);
   const [persistedStatus, setPersistedStatus] = useState<PostStatus | null>(initial?.status ?? null);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
@@ -142,6 +145,24 @@ export default function PostForm({ mode, slug, initial }: Props) {
       cursorSelectLength: DETAILS_TITLE_LEN,
     },
   ];
+
+  const images = useMemo(() => {
+    const found = [...content.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1]);
+    return [...new Set(found)];
+  }, [content]);
+
+  function setThumbnail(url: string | null) {
+    setThumbnailRaw(url);
+    setThumbnailTouched(true);
+  }
+
+  // ponytail: auto-suggests the first image found in the content as the
+  // thumbnail until the user explicitly picks one (including "없음"), so
+  // most posts get a sensible default without any manual step.
+  useEffect(() => {
+    if (thumbnailTouched) return;
+    if (images.length > 0) setThumbnailRaw(images[0]);
+  }, [images, thumbnailTouched]);
 
   useEffect(() => {
     if (!showUnsplash || !unsplashQuery.trim()) return;
@@ -183,7 +204,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
     }, 3000);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, date, summary, tags, content, visibility, persistedStatus]);
+  }, [title, date, summary, tags, content, visibility, thumbnail, persistedStatus]);
 
   // ponytail: execCommand is deprecated but it's still the only way to make a
   // programmatic textarea edit land on the browser's native undo stack
@@ -433,6 +454,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
       content,
       status: nextStatus,
       visibility,
+      thumbnail,
     };
     try {
       const res = await fetch(
@@ -739,6 +761,37 @@ export default function PostForm({ mode, slug, initial }: Props) {
           )}
         </div>
       </div>
+
+      {images.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <span className="font-mono text-xs text-muted">썸네일</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setThumbnail(null)}
+              className={`font-mono text-xs border rounded px-2.5 py-1.5 ${
+                thumbnail === null ? "border-accent text-accent" : "border-border text-muted hover:border-accent"
+              }`}
+            >
+              없음
+            </button>
+            {images.map((url) => (
+              <button
+                key={url}
+                type="button"
+                onClick={() => setThumbnail(url)}
+                title={url}
+                className={`w-16 h-16 rounded overflow-hidden border-2 ${
+                  thumbnail === url ? "border-accent" : "border-border hover:border-accent"
+                }`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex border border-border rounded overflow-hidden">

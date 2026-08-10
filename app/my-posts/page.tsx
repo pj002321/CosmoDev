@@ -13,7 +13,7 @@ export default async function MyPostsPage() {
   const posts = await getPostsByAuthor(userId);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
+    <div className="mx-auto max-w-7xl px-6 py-12">
       <div className="flex items-center justify-between mb-8">
         <div>
           <p className="font-mono text-xs text-muted mb-2">▸ MY POSTS</p>

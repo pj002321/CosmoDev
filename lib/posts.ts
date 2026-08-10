@@ -15,6 +15,7 @@ export type PostMeta = {
   views: number;
   status: PostStatus;
   visibility: PostVisibility;
+  thumbnail: string | null;
 };
 
 export type PostInput = {
@@ -25,6 +26,7 @@ export type PostInput = {
   content: string;
   status: PostStatus;
   visibility: PostVisibility;
+  thumbnail: string | null;
 };
 
 type Row = {
@@ -38,6 +40,7 @@ type Row = {
   views: number;
   status: PostStatus;
   visibility: PostVisibility;
+  thumbnail: string | null;
   content?: string;
 };
 
@@ -53,6 +56,7 @@ function toMeta(row: Row): PostMeta {
     views: row.views,
     status: row.status,
     visibility: row.visibility,
+    thumbnail: row.thumbnail,
   };
 }
 
@@ -72,7 +76,7 @@ export function uniqueTags(posts: { tags: string[] }[]): string[] {
 
 export async function getAllPosts(): Promise<PostMeta[]> {
   const rows = (await sql()`
-    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility
+    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility, thumbnail
     FROM posts WHERE status = 'published' AND visibility = 'public'
     ORDER BY date DESC, created_at DESC
   `) as Row[];
@@ -81,7 +85,7 @@ export async function getAllPosts(): Promise<PostMeta[]> {
 
 export async function getPostsByAuthor(authorId: string): Promise<PostMeta[]> {
   const rows = (await sql()`
-    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility
+    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility, thumbnail
     FROM posts WHERE author_id = ${authorId} ORDER BY date DESC, created_at DESC
   `) as Row[];
   return rows.map(toMeta);
@@ -89,7 +93,7 @@ export async function getPostsByAuthor(authorId: string): Promise<PostMeta[]> {
 
 export async function getPost(slug: string) {
   const rows = (await sql()`
-    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility, content
+    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility, thumbnail, content
     FROM posts WHERE slug = ${slug} LIMIT 1
   `) as Row[];
   const row = rows[0];
@@ -113,8 +117,8 @@ export async function incrementViews(slug: string): Promise<number> {
 export async function createPost(input: PostInput, authorId: string, authorName: string) {
   const slug = slugify(input.title, input.date);
   await sql()`
-    INSERT INTO posts (slug, title, date, summary, tags, content, author_id, author_name, status, visibility)
-    VALUES (${slug}, ${input.title}, ${input.date}, ${input.summary}, ${input.tags}, ${input.content}, ${authorId}, ${authorName}, ${input.status}, ${input.visibility})
+    INSERT INTO posts (slug, title, date, summary, tags, content, author_id, author_name, status, visibility, thumbnail)
+    VALUES (${slug}, ${input.title}, ${input.date}, ${input.summary}, ${input.tags}, ${input.content}, ${authorId}, ${authorName}, ${input.status}, ${input.visibility}, ${input.thumbnail})
   `;
   return slug;
 }
@@ -122,7 +126,8 @@ export async function createPost(input: PostInput, authorId: string, authorName:
 export async function updatePost(slug: string, input: PostInput, authorId: string) {
   const rows = (await sql()`
     UPDATE posts SET title = ${input.title}, date = ${input.date}, summary = ${input.summary},
-      tags = ${input.tags}, content = ${input.content}, status = ${input.status}, visibility = ${input.visibility}
+      tags = ${input.tags}, content = ${input.content}, status = ${input.status}, visibility = ${input.visibility},
+      thumbnail = ${input.thumbnail}
     WHERE slug = ${slug} AND author_id = ${authorId}
     RETURNING slug
   `) as { slug: string }[];

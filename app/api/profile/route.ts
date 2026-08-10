@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { setTagline } from "@/lib/profiles";
+import { setTagline, setBannerUrl } from "@/lib/profiles";
 
 export async function PATCH(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const { tagline } = await req.json();
+  const { tagline, bannerUrl } = await req.json();
+
+  if (typeof bannerUrl === "string" && bannerUrl) {
+    await setBannerUrl(userId, bannerUrl);
+    return NextResponse.json({ ok: true });
+  }
+
   if (typeof tagline !== "string" || !tagline.trim()) {
     return NextResponse.json({ error: "invalid tagline" }, { status: 400 });
   }

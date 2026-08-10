@@ -9,7 +9,7 @@ const dict = {
       home: "홈",
       write: "글쓰기",
       myPosts: "내 글",
-      explore: "둘러보기",
+      explore: "피드",
       friends: "내 친구",
       settings: "설정",
       graph: "그래프",
@@ -20,14 +20,14 @@ const dict = {
     },
     contact: "문의하기",
     explore: {
-      eyebrow: "EXPLORE",
-      title: "친구와 이웃의 글 둘러보기",
+      eyebrow: "FEED",
+      title: "친구와 이웃의 피드",
       empty: "아직 다른 사람이 쓴 글이 없습니다.",
     },
     friends: {
       eyebrow: "FRIENDS",
       title: "내 친구",
-      empty: "아직 팔로우한 친구가 없습니다. 둘러보기에서 팔로우해보세요.",
+      empty: "아직 팔로우한 친구가 없습니다. 피드에서 팔로우해보세요.",
     },
     sidebar: {
       settings: "설정",
@@ -53,7 +53,7 @@ const dict = {
       home: "Home",
       write: "Write",
       myPosts: "My Posts",
-      explore: "Explore",
+      explore: "Feed",
       friends: "Friends",
       settings: "Settings",
       graph: "Graph",
@@ -64,14 +64,14 @@ const dict = {
     },
     contact: "Contact",
     explore: {
-      eyebrow: "EXPLORE",
+      eyebrow: "FEED",
       title: "See what friends and neighbors are writing",
       empty: "No posts from others yet.",
     },
     friends: {
       eyebrow: "FRIENDS",
       title: "My Friends",
-      empty: "Not following anyone yet. Follow people from Explore.",
+      empty: "Not following anyone yet. Follow people from the feed.",
     },
     sidebar: {
       settings: "Settings",

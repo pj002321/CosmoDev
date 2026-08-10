@@ -10,7 +10,7 @@ export async function PUT(
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { slug } = await params;
-  const { title, date, summary, tags, content, status, visibility } = await req.json();
+  const { title, date, summary, tags, content, status, visibility, thumbnail } = await req.json();
   if (!title || !date || !content) {
     return NextResponse.json({ error: "필수 항목 누락" }, { status: 400 });
   }
@@ -25,6 +25,7 @@ export async function PUT(
       content,
       status: status === "draft" ? "draft" : "published",
       visibility: visibility === "private" ? "private" : "public",
+      thumbnail: typeof thumbnail === "string" ? thumbnail : null,
     },
     userId
   );

@@ -322,6 +322,10 @@ body {
   opacity: 1;
 }
 
+html[data-float="off"] .post-card {
+  animation: fade-in 0.4s ease-out both;
+}
+
 .logo-letter {
   display: inline-block;
   background: linear-gradient(90deg, var(--accent), var(--accent-2));

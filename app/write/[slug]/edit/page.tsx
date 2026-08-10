@@ -28,6 +28,7 @@ export default async function EditPostPage({
           content: post.content,
           status: post.status,
           visibility: post.visibility,
+          thumbnail: post.thumbnail,
         }}
       />
     </div>

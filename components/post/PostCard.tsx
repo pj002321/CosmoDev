@@ -13,22 +13,31 @@ type Post = {
   views?: number;
   status?: "draft" | "published";
   visibility?: "public" | "private";
+  thumbnail?: string | null;
 };
 
 export default function PostCard({
   post,
   index,
   showAuthor,
+  actions,
 }: {
   post: Post;
   index: number;
   showAuthor?: boolean;
+  actions?: React.ReactNode;
 }) {
   return (
     <div
       style={{ animationDelay: `${index * 60}ms` }}
       className="post-card group border border-border rounded-lg p-5 bg-surface hover:border-accent flex flex-col"
     >
+      {post.thumbnail && (
+        <div className="relative z-10 -mx-5 -mt-5 mb-3 aspect-video overflow-hidden rounded-t-lg">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={post.thumbnail} alt="" className="w-full h-full object-cover" />
+        </div>
+      )}
       <div className="flex items-center justify-between mb-3">
         <span className="card-index">{String(index + 1).padStart(2, "0")}</span>
         <span className="flex items-center gap-2">
@@ -82,6 +91,9 @@ export default function PostCard({
             </span>
           ))}
         </div>
+      )}
+      {actions && (
+        <div className="relative z-10 flex gap-2 mt-3">{actions}</div>
       )}
     </div>
   );

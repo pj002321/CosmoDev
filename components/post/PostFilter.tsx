@@ -55,12 +55,12 @@ export default function PostFilter({ posts, categories, allLabel, emptyLabel }: 
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
         {filtered.map((post, i) => (
           <PostCard key={post.slug} post={post} index={i} />
         ))}
         {filtered.length === 0 && (
-          <p className="text-sm text-muted sm:col-span-2">{emptyLabel}</p>
+          <p className="text-sm text-muted sm:col-span-2 lg:col-span-4">{emptyLabel}</p>
         )}
       </div>
     </>

@@ -27,6 +27,20 @@ export async function unfollow(followerId: string, followeeId: string) {
   `;
 }
 
+export async function getFollowerCount(followeeId: string): Promise<number> {
+  const rows = (await sql()`
+    SELECT count(*)::int AS count FROM follows WHERE followee_id = ${followeeId}
+  `) as { count: number }[];
+  return rows[0]?.count ?? 0;
+}
+
+export async function getFollowingCount(followerId: string): Promise<number> {
+  const rows = (await sql()`
+    SELECT count(*)::int AS count FROM follows WHERE follower_id = ${followerId}
+  `) as { count: number }[];
+  return rows[0]?.count ?? 0;
+}
+
 export async function getFriends(followerId: string): Promise<Friend[]> {
   const rows = (await sql()`
     SELECT followee_id, followee_name FROM follows

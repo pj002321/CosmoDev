@@ -15,16 +15,16 @@ export default async function ExplorePage() {
   const posts = rawPosts.map((p) => ({ ...p, likeCount: likeCounts[p.slug] ?? 0 }));
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12">
+    <div className="mx-auto max-w-7xl px-6 py-12">
       <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ {dict.eyebrow}</p>
       <h1 className="text-2xl font-semibold mb-8">{dict.title}</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {posts.map((post, i) => (
           <PostCard key={post.slug} post={post} index={i} showAuthor />
         ))}
         {posts.length === 0 && (
-          <p className="text-sm text-muted sm:col-span-2">{dict.empty}</p>
+          <p className="text-sm text-muted sm:col-span-2 lg:col-span-4">{dict.empty}</p>
         )}
       </div>
     </div>

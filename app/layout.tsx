@@ -10,6 +10,7 @@ import ThemeToggle from "@/components/layout/ThemeToggle";
 import UserMenu from "@/components/layout/UserMenu";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 import { THEME_COOKIE, defaultTheme, type Theme } from "@/lib/theme";
+import { FLOAT_COOKIE, defaultFloat, type FloatSetting } from "@/lib/floatSetting";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -121,12 +122,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale: Locale = cookieStore.get(LOCALE_COOKIE)?.value === "en" ? "en" : "ko";
   const dict = getDict(locale);
   const theme: Theme = cookieStore.get(THEME_COOKIE)?.value === "light" ? "light" : defaultTheme;
+  const floatSetting: FloatSetting =
+    cookieStore.get(FLOAT_COOKIE)?.value === "off" ? "off" : defaultFloat;
   const { flareStars, shootingStars, burstStar, target, dxPct, dyPct } = randomSky();
 
   return (
     <html
       lang={locale}
       data-theme={theme}
+      data-float={floatSetting}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">

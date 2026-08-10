@@ -25,6 +25,20 @@ type Link = { source: string | Node; target: string | Node };
 
 const UNCATEGORIZED = "미분류";
 
+function hashString(s: string) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h << 5) - h + s.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+function tagColor(label: string) {
+  const hue = hashString(label) % 360;
+  return `hsl(${hue} 75% 65%)`;
+}
+
 function buildGraph(posts: Post[]) {
   const tagIds = new Set<string>();
   const nodes: Node[] = [];
@@ -55,11 +69,12 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
   const { nodes, links } = useMemo(() => buildGraph(posts), [posts]);
   const [, bump] = useState(0);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
   const simRef = useRef<Simulation<Node, Link> | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragNode = useRef<Node | null>(null);
 
-  const clusterSize = Math.max(320, Math.sqrt(nodes.length) * 85);
+  const clusterSize = Math.max(240, Math.sqrt(nodes.length) * 60);
   const viewW = clusterSize * 2.2;
   const viewH = clusterSize * 1.3;
 
@@ -70,10 +85,10 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
         "link",
         forceLink<Node, Link>(links)
           .id((n) => n.id)
-          .distance(46)
-          .strength(0.6)
+          .distance(28)
+          .strength(0.9)
       )
-      .force("charge", forceManyBody().strength(-120))
+      .force("charge", forceManyBody().strength(-55))
       .force("center", forceCenter(0, 0))
       .force("collide", forceCollide<Node>((n) => (n.kind === "tag" ? 20 : 12)))
       .on("tick", () => {
@@ -146,15 +161,19 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
     return <p className="text-sm text-muted">아직 작성된 글이 없습니다.</p>;
   }
 
+  const effW = viewW / zoom;
+  const effH = viewH / zoom;
+
   return (
-    <svg
-      ref={svgRef}
-      viewBox={`${-viewW / 2} ${-viewH / 2} ${viewW} ${viewH}`}
-      className="w-full h-[85vh] touch-none select-none"
-      onPointerMove={handlePointerMove}
-      onPointerUp={endDrag}
-      onPointerLeave={endDrag}
-    >
+    <div className="relative">
+      <svg
+        ref={svgRef}
+        viewBox={`${-effW / 2} ${-effH / 2} ${effW} ${effH}`}
+        className="w-full h-[85vh] touch-none select-none"
+        onPointerMove={handlePointerMove}
+        onPointerUp={endDrag}
+        onPointerLeave={endDrag}
+      >
       {links.map((l, i) => {
         const s = byId.get(nodeId(l.source));
         const t = byId.get(nodeId(l.target));
@@ -176,6 +195,7 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
       {nodes.map((n) => {
         const dim = neighbors && !neighbors.has(n.id);
         const isTag = n.kind === "tag";
+        const color = isTag ? tagColor(n.label) : undefined;
         return (
           <g
             key={n.id}
@@ -189,7 +209,7 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
           >
             <circle
               r={isTag ? 5.5 : 3}
-              fill={isTag ? "var(--accent)" : "var(--surface)"}
+              fill={isTag ? color : "var(--surface)"}
               stroke={isTag ? "none" : "var(--muted)"}
               strokeWidth={isTag ? 0 : 1}
             />
@@ -198,13 +218,28 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
               y={2.8}
               fontSize={isTag ? 8 : 7}
               fontFamily="var(--font-mono)"
-              fill={isTag ? "var(--accent)" : "var(--muted)"}
+              fill={isTag ? color : "var(--muted)"}
             >
               {isTag ? n.label : n.label.length > 16 ? `${n.label.slice(0, 16)}…` : n.label}
             </text>
           </g>
         );
       })}
-    </svg>
+      </svg>
+      <div className="absolute top-1/2 right-3 -translate-y-1/2 flex flex-col items-center gap-2 glass-panel rounded-full px-1.5 py-3 border border-border">
+        <span className="font-mono text-[10px] text-muted">+</span>
+        <input
+          type="range"
+          min={0.5}
+          max={2.5}
+          step={0.1}
+          value={zoom}
+          onChange={(e) => setZoom(Number(e.target.value))}
+          className="zoom-gauge"
+          aria-label="확대/축소"
+        />
+        <span className="font-mono text-[10px] text-muted">−</span>
+      </div>
+    </div>
   );
 }

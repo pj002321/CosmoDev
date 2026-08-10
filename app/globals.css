@@ -412,6 +412,15 @@ html[data-float="off"] .post-card {
   }
 }
 
+.zoom-gauge {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 20px;
+  height: 120px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 @keyframes letter-in {
   to {
     opacity: 1;

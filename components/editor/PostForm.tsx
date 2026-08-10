@@ -119,6 +119,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [previewHtml, setPreviewHtml] = useState("");
+  const [imageSize, setImageSize] = useState<"small" | "medium" | "large" | "original">("medium");
   const [showUnsplash, setShowUnsplash] = useState(false);
   const [showTableBuilder, setShowTableBuilder] = useState(false);
   const [unsplashQuery, setUnsplashQuery] = useState("");
@@ -269,6 +270,15 @@ export default function PostForm({ mode, slug, initial }: Props) {
     setColorMenu(null);
   }
 
+  const IMAGE_WIDTHS = { small: 280, medium: 520, large: 760, original: null } as const;
+
+  function imageMarkup(alt: string, url: string) {
+    const width = IMAGE_WIDTHS[imageSize];
+    if (!width) return `![${alt}](${url})`;
+    const safeAlt = alt.replace(/"/g, "&quot;");
+    return `<img src="${url}" alt="${safeAlt}" width="${width}" />`;
+  }
+
   function insertAtCursor(insertion: string) {
     const el = textareaRef.current;
     if (el) {
@@ -408,7 +418,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
       const res = await fetch("/api/upload", { method: "POST", body: form });
       if (!res.ok) throw new Error("upload failed");
       const { url } = await res.json();
-      insertAtCursor(`![${file.name}](${url})\n`);
+      insertAtCursor(`${imageMarkup(file.name, url)}\n`);
     } catch {
       setError("이미지 업로드에 실패했습니다.");
     } finally {
@@ -433,7 +443,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
     }).catch(() => {});
 
     insertAtCursor(
-      `![${photo.alt}](${photo.regular})\n*Photo by [${photo.authorName}](${photo.authorUrl}?utm_source=devshot&utm_medium=referral) on [Unsplash](https://unsplash.com/?utm_source=devshot&utm_medium=referral)*\n`
+      `${imageMarkup(photo.alt, photo.regular)}\n*Photo by [${photo.authorName}](${photo.authorUrl}?utm_source=devshot&utm_medium=referral) on [Unsplash](https://unsplash.com/?utm_source=devshot&utm_medium=referral)*\n`
     );
     setShowUnsplash(false);
     setUnsplashQuery("");
@@ -617,6 +627,17 @@ export default function PostForm({ mode, slug, initial }: Props) {
           )}
         </div>
         <span className="w-px h-4 bg-border" />
+        <select
+          value={imageSize}
+          onChange={(e) => setImageSize(e.target.value as typeof imageSize)}
+          title="삽입할 사진 크기"
+          className="font-mono text-xs text-muted border border-border rounded px-1.5 py-1 hover:border-accent bg-transparent cursor-pointer"
+        >
+          <option value="small">작게</option>
+          <option value="medium">보통</option>
+          <option value="large">크게</option>
+          <option value="original">원본</option>
+        </select>
         <label className="font-mono text-xs text-muted border border-border rounded px-2 py-1 cursor-pointer hover:border-accent">
           {uploading ? "업로드 중…" : "이미지 삽입"}
           <input

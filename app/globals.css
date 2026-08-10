@@ -575,6 +575,13 @@ header a:not(.btn-accent):hover::after {
   text-underline-offset: 2px;
 }
 
+.prose-post img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 0.5rem 0;
+}
+
 .prose-post ul {
   list-style: disc;
   padding-left: 1.25rem;

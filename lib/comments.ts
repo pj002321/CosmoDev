@@ -13,7 +13,7 @@ type Row = {
   author_id: string;
   author_name: string;
   content: string;
-  created_at: string;
+  created_at: string | Date;
 };
 
 function toComment(row: Row): Comment {
@@ -22,7 +22,7 @@ function toComment(row: Row): Comment {
     authorId: row.author_id,
     authorName: row.author_name,
     content: row.content,
-    createdAt: row.created_at,
+    createdAt: new Date(row.created_at).toISOString(),
   };
 }
 

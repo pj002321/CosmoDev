@@ -27,3 +27,17 @@ export async function setBannerUrl(authorId: string, bannerUrl: string): Promise
     ON CONFLICT (author_id) DO UPDATE SET banner_url = EXCLUDED.banner_url
   `;
 }
+
+export async function getBannerPosition(authorId: string): Promise<number> {
+  const rows = (await sql()`
+    SELECT banner_position FROM profiles WHERE author_id = ${authorId} LIMIT 1
+  `) as { banner_position: number }[];
+  return rows[0]?.banner_position ?? 50;
+}
+
+export async function setBannerPosition(authorId: string, position: number): Promise<void> {
+  await sql()`
+    INSERT INTO profiles (author_id, tagline, banner_position) VALUES (${authorId}, '', ${position})
+    ON CONFLICT (author_id) DO UPDATE SET banner_position = EXCLUDED.banner_position
+  `;
+}

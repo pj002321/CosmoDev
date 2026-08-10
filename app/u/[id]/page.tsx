@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { getPostsByAuthor, uniqueTags } from "@/lib/posts";
-import { getTagline, getBannerUrl } from "@/lib/profiles";
+import { getTagline, getBannerUrl, getBannerPosition } from "@/lib/profiles";
 import { getLikeCounts } from "@/lib/likes";
 import { isFollowing, getFollowerCount, getFollowingCount } from "@/lib/follows";
 import { UserIcon, GraphIcon } from "@/components/icons";
@@ -27,7 +27,7 @@ export default async function ProfilePage({
   const likeCounts = await getLikeCounts(rawPosts.map((p) => p.slug));
   const posts = rawPosts.map((p) => ({ ...p, likeCount: likeCounts[p.slug] ?? 0 }));
   const tagline = (await getTagline(id)) ?? `${posts[0].authorName}의 글`;
-  const bannerUrl = await getBannerUrl(id);
+  const [bannerUrl, bannerPosition] = await Promise.all([getBannerUrl(id), getBannerPosition(id)]);
   const categories = uniqueTags(posts);
   const following = userId && userId !== id ? await isFollowing(userId, id) : false;
   const [followerCount, followingCount] = await Promise.all([
@@ -45,7 +45,7 @@ export default async function ProfilePage({
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
-      <BannerUpload bannerUrl={bannerUrl} editable={userId === id} />
+      <BannerUpload bannerUrl={bannerUrl} bannerPosition={bannerPosition} editable={userId === id} />
 
       <div className="flex items-center justify-between gap-3 mt-6 mb-10">
         <div className="flex items-center gap-3">

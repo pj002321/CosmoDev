@@ -74,4 +74,8 @@ await sql`
   ALTER TABLE posts ADD COLUMN IF NOT EXISTS thumbnail text
 `;
 
+await sql`
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_position integer NOT NULL DEFAULT 50
+`;
+
 console.log("migrated");

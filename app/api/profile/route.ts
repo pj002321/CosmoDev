@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { setTagline, setBannerUrl } from "@/lib/profiles";
+import { setTagline, setBannerUrl, setBannerPosition } from "@/lib/profiles";
 
 export async function PATCH(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const { tagline, bannerUrl } = await req.json();
+  const { tagline, bannerUrl, bannerPosition } = await req.json();
 
   if (typeof bannerUrl === "string" && bannerUrl) {
     await setBannerUrl(userId, bannerUrl);
+    return NextResponse.json({ ok: true });
+  }
+
+  if (typeof bannerPosition === "number") {
+    await setBannerPosition(userId, Math.max(0, Math.min(100, Math.round(bannerPosition))));
     return NextResponse.json({ ok: true });
   }
 

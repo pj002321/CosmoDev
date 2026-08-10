@@ -4,8 +4,8 @@ import { auth } from "@clerk/nextjs/server";
 import { getPostsByAuthor, uniqueTags } from "@/lib/posts";
 import { getTagline } from "@/lib/profiles";
 import { getLikeCounts } from "@/lib/likes";
-import EditableTagline from "@/components/EditableTagline";
-import PostFilter from "@/components/PostFilter";
+import EditableTagline from "@/components/profile/EditableTagline";
+import PostFilter from "@/components/post/PostFilter";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";

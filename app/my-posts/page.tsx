@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getPostsByAuthor } from "@/lib/posts";
-import MyPostsExplorer from "@/components/MyPostsExplorer";
+import MyPostsExplorer from "@/components/profile/MyPostsExplorer";
 
 export const dynamic = "force-dynamic";
 

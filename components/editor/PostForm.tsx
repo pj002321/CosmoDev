@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import TableBuilder from "@/components/TableBuilder";
+import TableBuilder from "@/components/editor/TableBuilder";
 import type { PostStatus, PostVisibility } from "@/lib/posts";
 import { HIGHLIGHT_COLORS } from "@/lib/colors";
 

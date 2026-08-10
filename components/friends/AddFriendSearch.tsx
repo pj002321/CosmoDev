@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { UserIcon } from "@/components/icons";
-import FollowButton from "@/components/FollowButton";
+import FollowButton from "@/components/friends/FollowButton";
 
 type SearchUser = { id: string; name: string; email: string };
 

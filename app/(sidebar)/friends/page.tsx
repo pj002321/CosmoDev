@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getFriends } from "@/lib/follows";
 import { UserIcon } from "@/components/icons";
-import FollowButton from "@/components/FollowButton";
-import AddFriendSearch from "@/components/AddFriendSearch";
+import FollowButton from "@/components/friends/FollowButton";
+import AddFriendSearch from "@/components/friends/AddFriendSearch";
 import Link from "next/link";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 

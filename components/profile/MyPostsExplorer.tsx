@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import DeletePostButton from "@/components/DeletePostButton";
+import DeletePostButton from "@/components/post/DeletePostButton";
 
 type Post = {
   slug: string;

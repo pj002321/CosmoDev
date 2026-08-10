@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getPostsByAuthor } from "@/lib/posts";
-import PostGraph from "@/components/PostGraph";
+import PostGraph from "@/components/graph/PostGraph";
 
 export const dynamic = "force-dynamic";
 

@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import LocaleSwitcher from "@/components/LocaleSwitcher";
+import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";

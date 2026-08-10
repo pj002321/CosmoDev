@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getPost } from "@/lib/posts";
-import PostForm from "@/components/PostForm";
+import PostForm from "@/components/editor/PostForm";
 
 export default async function EditPostPage({
   params,

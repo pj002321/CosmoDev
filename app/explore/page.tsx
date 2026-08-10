@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { getAllPosts } from "@/lib/posts";
 import { getLikeCounts } from "@/lib/likes";
-import PostCard from "@/components/PostCard";
+import PostCard from "@/components/post/PostCard";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";

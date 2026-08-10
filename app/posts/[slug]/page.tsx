@@ -5,10 +5,10 @@ import { getPost, incrementViews } from "@/lib/posts";
 import { getLikeState } from "@/lib/likes";
 import { getComments } from "@/lib/comments";
 import { EyeIcon } from "@/components/icons";
-import DeletePostButton from "@/components/DeletePostButton";
-import LikeButton from "@/components/LikeButton";
-import CommentSection from "@/components/CommentSection";
-import PostWidthToggle from "@/components/PostWidthToggle";
+import DeletePostButton from "@/components/post/DeletePostButton";
+import LikeButton from "@/components/post/LikeButton";
+import CommentSection from "@/components/post/CommentSection";
+import PostWidthToggle from "@/components/post/PostWidthToggle";
 
 export const dynamic = "force-dynamic";
 

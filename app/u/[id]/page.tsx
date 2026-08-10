@@ -6,8 +6,8 @@ import { getTagline } from "@/lib/profiles";
 import { getLikeCounts } from "@/lib/likes";
 import { isFollowing } from "@/lib/follows";
 import { UserIcon, GraphIcon } from "@/components/icons";
-import PostFilter from "@/components/PostFilter";
-import FollowButton from "@/components/FollowButton";
+import PostFilter from "@/components/post/PostFilter";
+import FollowButton from "@/components/friends/FollowButton";
 
 export const dynamic = "force-dynamic";
 

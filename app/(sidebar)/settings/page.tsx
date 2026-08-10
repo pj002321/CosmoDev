@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 import GitImportButton from "@/components/settings/GitImportButton";
+import NotionImportButton from "@/components/settings/NotionImportButton";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +21,10 @@ export default async function SettingsPage() {
         <LocaleSwitcher locale={locale} />
       </div>
 
-      <GitImportButton />
+      <div className="mb-4">
+        <GitImportButton />
+      </div>
+      <NotionImportButton />
     </div>
   );
 }

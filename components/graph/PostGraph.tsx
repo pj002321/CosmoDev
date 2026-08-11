@@ -43,7 +43,7 @@ function tagColor(label: string) {
 // tag vertices grow with how many posts carry that tag, so heavily-used
 // tags read as hubs at a glance (capped so one giant tag can't dominate)
 function tagRadius(weight: number) {
-  return Math.min(20, 5 + weight * 2.2);
+  return Math.min(13, 4 + weight * 1.4);
 }
 
 function buildGraph(posts: Post[]) {
@@ -224,15 +224,17 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
               strokeWidth={isTag ? 0 : 1}
               style={isTag ? { filter: `drop-shadow(0 0 ${4 + n.weight}px ${color})` } : undefined}
             />
-            <text
-              x={isTag ? tagRadius(n.weight) + 3 : 5.5}
-              y={2.8}
-              fontSize={isTag ? 8 : 7}
-              fontFamily="var(--font-mono)"
-              fill={isTag ? color : "var(--muted)"}
-            >
-              {isTag ? n.label : n.label.length > 16 ? `${n.label.slice(0, 16)}…` : n.label}
-            </text>
+            {zoom > 0.6 && (
+              <text
+                x={isTag ? tagRadius(n.weight) + 3 : 5.5}
+                y={2.8}
+                fontSize={isTag ? 8 : 7}
+                fontFamily="var(--font-mono)"
+                fill={isTag ? color : "var(--muted)"}
+              >
+                {isTag ? n.label : n.label.length > 16 ? `${n.label.slice(0, 16)}…` : n.label}
+              </text>
+            )}
           </g>
         );
       })}

@@ -96,4 +96,18 @@ await sql`
   CREATE INDEX IF NOT EXISTS notifications_recipient_idx ON notifications (recipient_id, created_at DESC)
 `;
 
+await sql`
+  CREATE TABLE IF NOT EXISTS inquiries (
+    id serial PRIMARY KEY,
+    sender_id text,
+    sender_name text NOT NULL,
+    sender_email text NOT NULL,
+    title text NOT NULL,
+    content text NOT NULL,
+    reply text,
+    replied_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )
+`;
+
 console.log("migrated");

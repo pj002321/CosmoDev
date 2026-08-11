@@ -9,6 +9,7 @@ import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 import ThemeToggle from "@/components/layout/ThemeToggle";
 import UserMenu from "@/components/layout/UserMenu";
 import NotificationBell from "@/components/layout/NotificationBell";
+import ContactButton from "@/components/layout/ContactButton";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 import { THEME_COOKIE, defaultTheme, type Theme } from "@/lib/theme";
 import { FLOAT_COOKIE, defaultFloat, type FloatSetting } from "@/lib/floatSetting";
@@ -334,12 +335,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <Link href="/graph" className="hover:text-accent transition-colors">
                   {dict.nav.graph}
                 </Link>
-                <a
-                  href="mailto:t55300354@gmail.com"
-                  className="hover:text-accent transition-colors"
-                >
-                  {dict.contact}
-                </a>
+                <ContactButton label={dict.contact} />
               </nav>
             </div>
           </footer>

@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { getPostsByAuthor, uniqueTags } from "@/lib/posts";
-import { getTagline, getBannerUrl, getBannerPosition } from "@/lib/profiles";
+import {
+  getTagline,
+  getBannerUrl,
+  getBannerPosition,
+  getWidgetPosition,
+  getWidgetOrder,
+  getWidgetLinks,
+} from "@/lib/profiles";
 import { getLikeCounts } from "@/lib/likes";
+import { getFollowerCount, getFollowingCount } from "@/lib/follows";
 import EditableTagline from "@/components/profile/EditableTagline";
 import PostFilter from "@/components/post/PostFilter";
 import BannerUpload from "@/components/profile/BannerUpload";
+import ProfileSidebar from "@/components/profile/ProfileSidebar";
 import { LOCALE_COOKIE, getDict, type Locale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
@@ -66,26 +75,61 @@ export default async function Home() {
   const posts = rawPosts.map((p) => ({ ...p, likeCount: likeCounts[p.slug] ?? 0 }));
   const tagline = (await getTagline(userId)) ?? dict.defaultTagline;
   const categories = uniqueTags(posts);
-  const [bannerUrl, bannerPosition] = await Promise.all([getBannerUrl(userId), getBannerPosition(userId)]);
+  const [bannerUrl, bannerPosition, widgetPosition, widgetOrder, widgetLinks, followerCount, followingCount] =
+    await Promise.all([
+      getBannerUrl(userId),
+      getBannerPosition(userId),
+      getWidgetPosition(userId),
+      getWidgetOrder(userId),
+      getWidgetLinks(userId),
+      getFollowerCount(userId),
+      getFollowingCount(userId),
+    ]);
+
+  const client = await clerkClient();
+  const me = await client.users.getUser(userId);
+  const authorName = me.fullName || me.username || me.emailAddresses[0]?.emailAddress || "익명";
+  const recentPosts = posts.slice(0, 5).map((p) => ({ slug: p.slug, title: p.title, date: p.date }));
+  const postDates = posts.map((p) => p.date);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
       <BannerUpload bannerUrl={bannerUrl} bannerPosition={bannerPosition} editable />
 
-      <div className="flex items-center justify-between mb-10 mt-6">
-        <div>
-          <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ {dict.archive}</p>
-          <EditableTagline initialValue={tagline} />
+      <div
+        className={`flex flex-col md:flex-row gap-8 mt-8 ${
+          widgetPosition === "right" ? "md:flex-row-reverse" : ""
+        }`}
+      >
+        <ProfileSidebar
+          id={userId}
+          authorName={authorName}
+          tagline={tagline}
+          avatarUrl={me.imageUrl}
+          followerCount={followerCount}
+          followingCount={followingCount}
+          editable
+          viewerId={userId}
+          initialFollowing={false}
+          recentPosts={recentPosts}
+          postDates={postDates}
+          initialPosition={widgetPosition}
+          initialOrder={widgetOrder}
+          initialLinks={widgetLinks}
+        />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="font-mono text-xs text-muted mb-2 animate-fade-in">▸ {dict.archive}</p>
+              <EditableTagline initialValue={tagline} />
+            </div>
+            <Link href="/write" className="btn-accent font-mono text-xs rounded px-3 py-2">
+              {dict.newPost}
+            </Link>
+          </div>
+          <PostFilter posts={posts} categories={categories} allLabel={dict.all} emptyLabel={dict.empty} />
         </div>
-        <Link
-          href="/write"
-          className="btn-accent font-mono text-xs rounded px-3 py-2"
-        >
-          {dict.newPost}
-        </Link>
       </div>
-
-      <PostFilter posts={posts} categories={categories} allLabel={dict.all} emptyLabel={dict.empty} />
     </div>
   );
 }

@@ -3,17 +3,51 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { GraphIcon, UserIcon, LinkIcon } from "@/components/icons";
+import {
+  GraphIcon,
+  UserIcon,
+  LinkIcon,
+  PlusIcon,
+  XIcon,
+  LinkedinIcon,
+  InstagramIcon,
+  YoutubeIcon,
+  GithubIcon,
+} from "@/components/icons";
 import FollowButton from "@/components/friends/FollowButton";
 
-type WidgetKey = "recent" | "calendar" | "links";
+type WidgetKey = "recent" | "calendar" | "links" | "x" | "linkedin" | "instagram" | "youtube" | "github";
 type WidgetLink = { label: string; url: string };
+type WidgetSocial = {
+  x?: string;
+  linkedin?: string;
+  instagram?: string;
+  youtube?: string;
+  github?: string;
+  githubRepos?: WidgetLink[];
+};
 type RecentPost = { slug: string; title: string; date: string };
+type SocialKey = "x" | "linkedin" | "instagram" | "youtube" | "github";
+
+const ALL_WIDGET_KEYS: WidgetKey[] = ["recent", "calendar", "links", "x", "linkedin", "instagram", "youtube", "github"];
 
 const WIDGET_LABELS: Record<WidgetKey, string> = {
   recent: "최근 글",
   calendar: "캘린더",
   links: "링크",
+  x: "X",
+  linkedin: "LinkedIn",
+  instagram: "Instagram",
+  youtube: "YouTube",
+  github: "GitHub",
+};
+
+const SOCIAL_ICONS: Record<SocialKey, (props: { className?: string }) => React.ReactElement> = {
+  x: XIcon,
+  linkedin: LinkedinIcon,
+  instagram: InstagramIcon,
+  youtube: YoutubeIcon,
+  github: GithubIcon,
 };
 
 export default function ProfileSidebar({
@@ -31,6 +65,7 @@ export default function ProfileSidebar({
   initialPosition,
   initialOrder,
   initialLinks,
+  initialSocial,
 }: {
   id: string;
   authorName: string;
@@ -46,13 +81,16 @@ export default function ProfileSidebar({
   initialPosition: "left" | "right";
   initialOrder: WidgetKey[];
   initialLinks: WidgetLink[];
+  initialSocial: WidgetSocial;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [position, setPosition] = useState(initialPosition);
   const [order, setOrder] = useState(initialOrder);
   const [links, setLinks] = useState(initialLinks);
+  const [social, setSocial] = useState(initialSocial);
   const [saving, setSaving] = useState(false);
+  const [showAddMenu, setShowAddMenu] = useState(false);
 
   async function patch(body: Record<string, unknown>) {
     await fetch("/api/profile", {
@@ -73,6 +111,19 @@ export default function ProfileSidebar({
     if (target < 0 || target >= order.length) return;
     const next = [...order];
     [next[index], next[target]] = [next[target], next[index]];
+    setOrder(next);
+    patch({ widgetOrder: next });
+  }
+
+  function addWidget(key: WidgetKey) {
+    const next = [...order, key];
+    setOrder(next);
+    patch({ widgetOrder: next });
+    setShowAddMenu(false);
+  }
+
+  function removeWidget(key: WidgetKey) {
+    const next = order.filter((k) => k !== key);
     setOrder(next);
     patch({ widgetOrder: next });
   }
@@ -100,6 +151,45 @@ export default function ProfileSidebar({
       setSaving(false);
     }
   }
+
+  async function saveSocialUrl(key: SocialKey, value: string) {
+    const next = { ...social, [key]: value };
+    setSocial(next);
+    await patch({ widgetSocial: next });
+    router.refresh();
+  }
+
+  function addRepo() {
+    setSocial((prev) => ({ ...prev, githubRepos: [...(prev.githubRepos ?? []), { label: "", url: "" }] }));
+  }
+
+  function updateRepo(i: number, field: "label" | "url", value: string) {
+    setSocial((prev) => ({
+      ...prev,
+      githubRepos: (prev.githubRepos ?? []).map((r, idx) => (idx === i ? { ...r, [field]: value } : r)),
+    }));
+  }
+
+  function removeRepo(i: number) {
+    setSocial((prev) => ({ ...prev, githubRepos: (prev.githubRepos ?? []).filter((_, idx) => idx !== i) }));
+  }
+
+  async function saveGithub() {
+    setSaving(true);
+    try {
+      const cleaned = {
+        ...social,
+        githubRepos: (social.githubRepos ?? []).filter((r) => r.label.trim() && r.url.trim()),
+      };
+      setSocial(cleaned);
+      await patch({ widgetSocial: cleaned });
+      router.refresh();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const availableToAdd = ALL_WIDGET_KEYS.filter((k) => !order.includes(k));
 
   return (
     <aside className="w-full md:w-64 shrink-0 flex flex-col gap-4">
@@ -158,12 +248,40 @@ export default function ProfileSidebar({
         </div>
       )}
 
+      {editable && editing && (
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowAddMenu((v) => !v)}
+            disabled={availableToAdd.length === 0}
+            className="flex items-center justify-center gap-1.5 w-full font-mono text-[11px] border border-dashed border-border rounded px-2 py-2 text-muted hover:border-accent hover:text-accent disabled:opacity-30"
+          >
+            <PlusIcon className="w-3 h-3" />
+            위젯 추가
+          </button>
+          {showAddMenu && availableToAdd.length > 0 && (
+            <div className="absolute z-10 top-full mt-1 left-0 right-0 border border-border rounded-lg bg-surface p-1.5 flex flex-col gap-0.5">
+              {availableToAdd.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => addWidget(key)}
+                  className="text-left font-mono text-[11px] rounded px-2 py-1.5 hover:bg-background hover:text-accent"
+                >
+                  {WIDGET_LABELS[key]}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {order.map((key, i) => (
         <div key={key} className="flex flex-col gap-2">
           {editable && editing && (
             <div className="flex items-center justify-between px-0.5">
               <span className="font-mono text-[11px] text-muted">{WIDGET_LABELS[key]}</span>
-              <div className="flex gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   disabled={i === 0}
@@ -180,6 +298,13 @@ export default function ProfileSidebar({
                 >
                   ▼
                 </button>
+                <button
+                  type="button"
+                  onClick={() => removeWidget(key)}
+                  className="font-mono text-[11px] text-muted hover:text-accent"
+                >
+                  ×
+                </button>
               </div>
             </div>
           )}
@@ -195,6 +320,28 @@ export default function ProfileSidebar({
               onRemove={removeLink}
               onSave={saveLinks}
             />
+          )}
+          {key === "github" ? (
+            <GithubWidget
+              url={social.github ?? ""}
+              repos={social.githubRepos ?? []}
+              editing={editable && editing}
+              saving={saving}
+              onUrlBlur={(value) => saveSocialUrl("github", value)}
+              onAddRepo={addRepo}
+              onChangeRepo={updateRepo}
+              onRemoveRepo={removeRepo}
+              onSave={saveGithub}
+            />
+          ) : (
+            (key === "x" || key === "linkedin" || key === "instagram" || key === "youtube") && (
+              <SocialWidget
+                platform={key}
+                url={social[key] ?? ""}
+                editing={editable && editing}
+                onBlurSave={(value) => saveSocialUrl(key, value)}
+              />
+            )
           )}
         </div>
       ))}
@@ -360,6 +507,162 @@ function LinksWidget({
             </li>
           ))}
         </ul>
+      )}
+    </div>
+  );
+}
+
+function SocialWidget({
+  platform,
+  url,
+  editing,
+  onBlurSave,
+}: {
+  platform: SocialKey;
+  url: string;
+  editing: boolean;
+  onBlurSave: (value: string) => void;
+}) {
+  const [value, setValue] = useState(url);
+  const Icon = SOCIAL_ICONS[platform];
+
+  if (!editing && !url) return null;
+
+  return (
+    <div className="border border-border rounded-lg bg-surface p-4">
+      <p className="font-mono text-[11px] text-muted mb-2 flex items-center gap-1.5">
+        <Icon className="w-3 h-3" />
+        {WIDGET_LABELS[platform]}
+      </p>
+      {editing ? (
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={() => value.trim() !== url && onBlurSave(value.trim())}
+          placeholder="https://"
+          className="w-full bg-background border border-border rounded px-1.5 py-1 text-xs outline-none focus:border-accent"
+        />
+      ) : (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-sm hover:text-accent"
+        >
+          <span className="line-clamp-1">{url}</span>
+        </a>
+      )}
+    </div>
+  );
+}
+
+function GithubWidget({
+  url,
+  repos,
+  editing,
+  saving,
+  onUrlBlur,
+  onAddRepo,
+  onChangeRepo,
+  onRemoveRepo,
+  onSave,
+}: {
+  url: string;
+  repos: WidgetLink[];
+  editing: boolean;
+  saving: boolean;
+  onUrlBlur: (value: string) => void;
+  onAddRepo: () => void;
+  onChangeRepo: (i: number, field: "label" | "url", value: string) => void;
+  onRemoveRepo: (i: number) => void;
+  onSave: () => void;
+}) {
+  const [value, setValue] = useState(url);
+
+  if (!editing && !url && repos.length === 0) return null;
+
+  return (
+    <div className="border border-border rounded-lg bg-surface p-4">
+      <p className="font-mono text-[11px] text-muted mb-2 flex items-center gap-1.5">
+        <GithubIcon className="w-3 h-3" />
+        GitHub
+      </p>
+      {editing ? (
+        <div className="flex flex-col gap-2">
+          <input
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onBlur={() => value.trim() !== url && onUrlBlur(value.trim())}
+            placeholder="https://github.com/아이디"
+            className="w-full bg-background border border-border rounded px-1.5 py-1 text-xs outline-none focus:border-accent"
+          />
+          <p className="font-mono text-[10px] text-muted mt-1">노출할 레포지토리 (선택)</p>
+          {repos.map((repo, i) => (
+            <div key={i} className="flex items-center gap-1">
+              <input
+                value={repo.label}
+                onChange={(e) => onChangeRepo(i, "label", e.target.value)}
+                placeholder="레포명"
+                className="w-16 bg-background border border-border rounded px-1.5 py-1 text-xs outline-none focus:border-accent"
+              />
+              <input
+                value={repo.url}
+                onChange={(e) => onChangeRepo(i, "url", e.target.value)}
+                placeholder="https://github.com/.../repo"
+                className="flex-1 min-w-0 bg-background border border-border rounded px-1.5 py-1 text-xs outline-none focus:border-accent"
+              />
+              <button
+                type="button"
+                onClick={() => onRemoveRepo(i)}
+                className="text-muted hover:text-accent text-xs px-1"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+          <div className="flex items-center justify-between mt-1">
+            <button type="button" onClick={onAddRepo} className="font-mono text-[11px] text-muted hover:text-accent">
+              + 레포 추가
+            </button>
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={saving}
+              className="font-mono text-[11px] border border-border rounded px-2 py-1 hover:border-accent disabled:opacity-50"
+            >
+              {saving ? "저장 중…" : "저장"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          {url && (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm hover:text-accent line-clamp-1"
+            >
+              {url}
+            </a>
+          )}
+          {repos.length > 0 && (
+            <ul className="flex flex-col gap-1">
+              {repos.map((repo, i) => (
+                <li key={i}>
+                  <a
+                    href={repo.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-muted hover:text-accent line-clamp-1 block"
+                  >
+                    ▸ {repo.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
     </div>
   );

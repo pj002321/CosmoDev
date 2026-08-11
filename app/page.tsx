@@ -9,6 +9,7 @@ import {
   getWidgetPosition,
   getWidgetOrder,
   getWidgetLinks,
+  getWidgetSocial,
 } from "@/lib/profiles";
 import { getLikeCounts } from "@/lib/likes";
 import { getFollowerCount, getFollowingCount } from "@/lib/follows";
@@ -75,16 +76,25 @@ export default async function Home() {
   const posts = rawPosts.map((p) => ({ ...p, likeCount: likeCounts[p.slug] ?? 0 }));
   const tagline = (await getTagline(userId)) ?? dict.defaultTagline;
   const categories = uniqueTags(posts);
-  const [bannerUrl, bannerPosition, widgetPosition, widgetOrder, widgetLinks, followerCount, followingCount] =
-    await Promise.all([
-      getBannerUrl(userId),
-      getBannerPosition(userId),
-      getWidgetPosition(userId),
-      getWidgetOrder(userId),
-      getWidgetLinks(userId),
-      getFollowerCount(userId),
-      getFollowingCount(userId),
-    ]);
+  const [
+    bannerUrl,
+    bannerPosition,
+    widgetPosition,
+    widgetOrder,
+    widgetLinks,
+    widgetSocial,
+    followerCount,
+    followingCount,
+  ] = await Promise.all([
+    getBannerUrl(userId),
+    getBannerPosition(userId),
+    getWidgetPosition(userId),
+    getWidgetOrder(userId),
+    getWidgetLinks(userId),
+    getWidgetSocial(userId),
+    getFollowerCount(userId),
+    getFollowingCount(userId),
+  ]);
 
   const client = await clerkClient();
   const me = await client.users.getUser(userId);
@@ -116,6 +126,7 @@ export default async function Home() {
           initialPosition={widgetPosition}
           initialOrder={widgetOrder}
           initialLinks={widgetLinks}
+          initialSocial={widgetSocial}
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-6">

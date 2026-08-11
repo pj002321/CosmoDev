@@ -122,4 +122,8 @@ await sql`
   ALTER TABLE profiles ADD COLUMN IF NOT EXISTS widget_links jsonb NOT NULL DEFAULT '[]'
 `;
 
+await sql`
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS widget_social jsonb NOT NULL DEFAULT '{}'
+`;
+
 console.log("migrated");

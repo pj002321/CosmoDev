@@ -42,11 +42,37 @@ export async function setBannerPosition(authorId: string, position: number): Pro
   `;
 }
 
-export type WidgetKey = "recent" | "calendar" | "links";
+export type WidgetKey =
+  | "recent"
+  | "calendar"
+  | "links"
+  | "x"
+  | "linkedin"
+  | "instagram"
+  | "youtube"
+  | "github";
 export type WidgetPosition = "left" | "right";
 export type WidgetLink = { label: string; url: string };
+export type WidgetSocial = {
+  x?: string;
+  linkedin?: string;
+  instagram?: string;
+  youtube?: string;
+  github?: string;
+  githubRepos?: WidgetLink[];
+};
 
 export const DEFAULT_WIDGET_ORDER: WidgetKey[] = ["recent", "calendar", "links"];
+export const ALL_WIDGET_KEYS: WidgetKey[] = [
+  "recent",
+  "calendar",
+  "links",
+  "x",
+  "linkedin",
+  "instagram",
+  "youtube",
+  "github",
+];
 
 export async function getWidgetPosition(authorId: string): Promise<WidgetPosition> {
   const rows = (await sql()`
@@ -87,5 +113,19 @@ export async function setWidgetLinks(authorId: string, links: WidgetLink[]): Pro
   await sql()`
     INSERT INTO profiles (author_id, tagline, widget_links) VALUES (${authorId}, '', ${JSON.stringify(links)}::jsonb)
     ON CONFLICT (author_id) DO UPDATE SET widget_links = EXCLUDED.widget_links
+  `;
+}
+
+export async function getWidgetSocial(authorId: string): Promise<WidgetSocial> {
+  const rows = (await sql()`
+    SELECT widget_social FROM profiles WHERE author_id = ${authorId} LIMIT 1
+  `) as { widget_social: WidgetSocial }[];
+  return rows[0]?.widget_social ?? {};
+}
+
+export async function setWidgetSocial(authorId: string, social: WidgetSocial): Promise<void> {
+  await sql()`
+    INSERT INTO profiles (author_id, tagline, widget_social) VALUES (${authorId}, '', ${JSON.stringify(social)}::jsonb)
+    ON CONFLICT (author_id) DO UPDATE SET widget_social = EXCLUDED.widget_social
   `;
 }

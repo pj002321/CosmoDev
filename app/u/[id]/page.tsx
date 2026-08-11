@@ -8,6 +8,7 @@ import {
   getWidgetPosition,
   getWidgetOrder,
   getWidgetLinks,
+  getWidgetSocial,
 } from "@/lib/profiles";
 import { getLikeCounts } from "@/lib/likes";
 import { isFollowing, getFollowerCount, getFollowingCount } from "@/lib/follows";
@@ -32,12 +33,13 @@ export default async function ProfilePage({
   const likeCounts = await getLikeCounts(rawPosts.map((p) => p.slug));
   const posts = rawPosts.map((p) => ({ ...p, likeCount: likeCounts[p.slug] ?? 0 }));
   const tagline = (await getTagline(id)) ?? `${posts[0].authorName}의 글`;
-  const [bannerUrl, bannerPosition, widgetPosition, widgetOrder, widgetLinks] = await Promise.all([
+  const [bannerUrl, bannerPosition, widgetPosition, widgetOrder, widgetLinks, widgetSocial] = await Promise.all([
     getBannerUrl(id),
     getBannerPosition(id),
     getWidgetPosition(id),
     getWidgetOrder(id),
     getWidgetLinks(id),
+    getWidgetSocial(id),
   ]);
   const categories = uniqueTags(posts);
   const following = userId && userId !== id ? await isFollowing(userId, id) : false;
@@ -81,6 +83,7 @@ export default async function ProfilePage({
           initialPosition={widgetPosition}
           initialOrder={widgetOrder}
           initialLinks={widgetLinks}
+          initialSocial={widgetSocial}
         />
         <div className="flex-1 min-w-0">
           <PostFilter posts={posts} categories={categories} allLabel="전체" emptyLabel="아직 작성된 글이 없습니다." />

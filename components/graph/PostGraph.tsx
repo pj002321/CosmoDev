@@ -25,6 +25,8 @@ type Node = SimulationNodeDatum & {
 type Link = { source: string | Node; target: string | Node };
 
 const UNCATEGORIZED = "미분류";
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 1.8;
 
 function hashString(s: string) {
   let h = 0;
@@ -79,14 +81,14 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
   const { nodes, links } = useMemo(() => buildGraph(posts), [posts]);
   const [, bump] = useState(0);
   const [hovered, setHovered] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(ZOOM_MIN);
   const simRef = useRef<Simulation<Node, Link> | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragNode = useRef<Node | null>(null);
 
-  const clusterSize = Math.max(240, Math.sqrt(nodes.length) * 60);
-  const viewW = clusterSize * 2.2;
-  const viewH = clusterSize * 1.3;
+  const clusterSize = Math.max(320, Math.sqrt(nodes.length) * 70);
+  const viewW = clusterSize * 3;
+  const viewH = clusterSize * 2;
 
   useEffect(() => {
     if (nodes.length === 0) return;
@@ -243,8 +245,8 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
         <span className="font-mono text-[10px] text-muted">+</span>
         <input
           type="range"
-          min={0.5}
-          max={2.5}
+          min={ZOOM_MIN}
+          max={ZOOM_MAX}
           step={0.1}
           value={zoom}
           onChange={(e) => setZoom(Number(e.target.value))}

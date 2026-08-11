@@ -1,4 +1,4 @@
-# DevShot
+# CosmoDev
 
 개인 개발 일지 블로그. Next.js + 마크다운, Vercel 배포.
 

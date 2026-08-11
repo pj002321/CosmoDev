@@ -24,7 +24,7 @@ export default async function Home() {
           <span className="term-dot" />
           <span className="term-dot" />
           <span className="term-dot accent" />
-          <span className="ml-2 font-mono text-[11px] text-muted">~/devshot</span>
+          <span className="ml-2 font-mono text-[11px] text-muted">~/cosmodev</span>
         </div>
         <div className="glass-panel border border-border rounded-b-lg px-8 py-16 text-center">
           <p className="font-mono text-xs text-muted mb-3 animate-fade-in">

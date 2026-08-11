@@ -443,7 +443,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
     }).catch(() => {});
 
     insertAtCursor(
-      `${imageMarkup(photo.alt, photo.regular)}\n*Photo by [${photo.authorName}](${photo.authorUrl}?utm_source=devshot&utm_medium=referral) on [Unsplash](https://unsplash.com/?utm_source=devshot&utm_medium=referral)*\n`
+      `${imageMarkup(photo.alt, photo.regular)}\n*Photo by [${photo.authorName}](${photo.authorUrl}?utm_source=cosmodev&utm_medium=referral) on [Unsplash](https://unsplash.com/?utm_source=cosmodev&utm_medium=referral)*\n`
     );
     setShowUnsplash(false);
     setUnsplashQuery("");

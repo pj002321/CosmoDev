@@ -1,5 +1,5 @@
 const GITHUB_API = "https://api.github.com";
-const USER_AGENT = "DevShot-Import";
+const USER_AGENT = "CosmoDev-Import";
 
 export type GitFile = { path: string; category: string };
 export type GitCategory = { name: string; count: number };

@@ -50,7 +50,7 @@ const clerkAppearance = {
 } as NonNullable<React.ComponentProps<typeof ClerkProvider>["appearance"]>;
 
 export const metadata: Metadata = {
-  title: "DEVShot",
+  title: "CosmoDev",
   description: "개인 개발 일지",
 };
 
@@ -207,7 +207,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   <span className="term-dot accent" />
                 </span>
                 <span className="inline-flex">
-                  {"DEVShot".split("").map((ch, i) => (
+                  {"CosmoDev".split("").map((ch, i) => (
                     <span
                       key={i}
                       className="logo-letter"
@@ -303,7 +303,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <span className="photo-credit">
                   Photo by{" "}
                   <a
-                    href="https://unsplash.com/@mosiknife?utm_source=devshot&utm_medium=referral"
+                    href="https://unsplash.com/@mosiknife?utm_source=cosmodev&utm_medium=referral"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-accent transition-colors"
@@ -312,7 +312,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   </a>{" "}
                   on{" "}
                   <a
-                    href="https://unsplash.com/?utm_source=devshot&utm_medium=referral"
+                    href="https://unsplash.com/?utm_source=cosmodev&utm_medium=referral"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-accent transition-colors"

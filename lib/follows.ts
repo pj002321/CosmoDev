@@ -41,6 +41,13 @@ export async function getFollowingCount(followerId: string): Promise<number> {
   return rows[0]?.count ?? 0;
 }
 
+export async function getFollowerIds(followeeId: string): Promise<string[]> {
+  const rows = (await sql()`
+    SELECT follower_id FROM follows WHERE followee_id = ${followeeId} ORDER BY created_at DESC
+  `) as { follower_id: string }[];
+  return rows.map((r) => r.follower_id);
+}
+
 export async function getFriends(followerId: string): Promise<Friend[]> {
   const rows = (await sql()`
     SELECT followee_id, followee_name FROM follows

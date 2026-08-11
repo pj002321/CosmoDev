@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import {
   GraphIcon,
@@ -28,6 +29,7 @@ type WidgetSocial = {
 };
 type RecentPost = { slug: string; title: string; date: string };
 type SocialKey = "x" | "linkedin" | "instagram" | "youtube" | "github";
+type FollowUser = { id: string; name: string };
 
 const ALL_WIDGET_KEYS: WidgetKey[] = ["recent", "calendar", "links", "x", "linkedin", "instagram", "youtube", "github"];
 
@@ -57,6 +59,8 @@ export default function ProfileSidebar({
   avatarUrl,
   followerCount,
   followingCount,
+  followers,
+  following,
   editable,
   viewerId,
   initialFollowing,
@@ -73,6 +77,8 @@ export default function ProfileSidebar({
   avatarUrl: string | null;
   followerCount: number;
   followingCount: number;
+  followers: FollowUser[];
+  following: FollowUser[];
   editable: boolean;
   viewerId: string | null;
   initialFollowing: boolean;
@@ -84,6 +90,10 @@ export default function ProfileSidebar({
   initialSocial: WidgetSocial;
 }) {
   const router = useRouter();
+  const { user } = useUser();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [followModal, setFollowModal] = useState<"followers" | "following" | null>(null);
   const [editing, setEditing] = useState(false);
   const [position, setPosition] = useState(initialPosition);
   const [order, setOrder] = useState(initialOrder);
@@ -191,22 +201,62 @@ export default function ProfileSidebar({
 
   const availableToAdd = ALL_WIDGET_KEYS.filter((k) => !order.includes(k));
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+    setUploadingAvatar(true);
+    try {
+      await user.setProfileImage({ file });
+      router.refresh();
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
+
   return (
     <aside className="w-full md:w-64 shrink-0 flex flex-col gap-4">
       <div className="flex flex-col items-center text-center gap-2 border border-border rounded-lg bg-surface p-5">
         <p className="font-mono text-[10px] text-muted">▸ PROFILE</p>
-        <span className="flex items-center justify-center w-20 h-20 rounded-full border border-border bg-background text-accent overflow-hidden">
+        <button
+          type="button"
+          onClick={() => editable && fileInputRef.current?.click()}
+          disabled={!editable || uploadingAvatar}
+          className={`group relative flex items-center justify-center w-20 h-20 rounded-full border border-border bg-background text-accent overflow-hidden ${
+            editable ? "cursor-pointer" : "cursor-default"
+          }`}
+        >
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={avatarUrl} alt={authorName} className="w-full h-full object-cover" />
           ) : (
             <UserIcon className="w-7 h-7" />
           )}
-        </span>
+          {editable && (
+            <span className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity font-mono text-[10px] text-white">
+              {uploadingAvatar ? "업로드 중…" : "변경"}
+            </span>
+          )}
+        </button>
+        {editable && (
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="hidden"
+          />
+        )}
         <p className="font-semibold">{authorName}</p>
         <p className="font-mono text-xs text-muted">{tagline}</p>
         <p className="font-mono text-xs text-muted">
-          팔로워 {followerCount} · 팔로잉 {followingCount}
+          <button type="button" onClick={() => setFollowModal("followers")} className="hover:text-accent">
+            팔로워 {followerCount}
+          </button>
+          {" · "}
+          <button type="button" onClick={() => setFollowModal("following")} className="hover:text-accent">
+            팔로잉 {followingCount}
+          </button>
         </p>
         <div className="flex items-center gap-2 mt-1">
           <Link
@@ -345,7 +395,62 @@ export default function ProfileSidebar({
           )}
         </div>
       ))}
+
+      {followModal && (
+        <FollowListModal
+          title={followModal === "followers" ? "팔로워" : "팔로잉"}
+          users={followModal === "followers" ? followers : following}
+          onClose={() => setFollowModal(null)}
+        />
+      )}
     </aside>
+  );
+}
+
+function FollowListModal({
+  title,
+  users,
+  onClose,
+}: {
+  title: string;
+  users: FollowUser[];
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="glass-panel border border-border rounded-lg w-full max-w-sm p-6 flex flex-col gap-4 max-h-[70vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <p className="font-semibold">{title}</p>
+          <button type="button" onClick={onClose} className="text-muted hover:text-accent">
+            <XIcon className="w-4 h-4" />
+          </button>
+        </div>
+        {users.length === 0 ? (
+          <p className="font-mono text-xs text-muted">아직 없습니다</p>
+        ) : (
+          <ul className="flex flex-col gap-1 overflow-y-auto">
+            {users.map((u) => (
+              <li key={u.id}>
+                <Link
+                  href={`/u/${u.id}`}
+                  onClick={onClose}
+                  className="flex items-center gap-1.5 text-sm hover:text-accent py-1.5"
+                >
+                  <UserIcon className="w-3.5 h-3.5 shrink-0" />
+                  <span className="line-clamp-1">{u.name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }
 

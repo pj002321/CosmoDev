@@ -11,7 +11,7 @@ import {
   getWidgetSocial,
 } from "@/lib/profiles";
 import { getLikeCounts } from "@/lib/likes";
-import { isFollowing, getFollowerCount, getFollowingCount } from "@/lib/follows";
+import { isFollowing, getFollowerCount, getFollowingCount, getFollowerIds, getFriends } from "@/lib/follows";
 import PostFilter from "@/components/post/PostFilter";
 import BannerUpload from "@/components/profile/BannerUpload";
 import ProfileSidebar from "@/components/profile/ProfileSidebar";
@@ -42,19 +42,30 @@ export default async function ProfilePage({
     getWidgetSocial(id),
   ]);
   const categories = uniqueTags(posts);
-  const following = userId && userId !== id ? await isFollowing(userId, id) : false;
-  const [followerCount, followingCount] = await Promise.all([
+  const isFollowingUser = userId && userId !== id ? await isFollowing(userId, id) : false;
+  const [followerCount, followingCount, followerIds, followingFriends] = await Promise.all([
     getFollowerCount(id),
     getFollowingCount(id),
+    getFollowerIds(id),
+    getFriends(id),
   ]);
 
   let avatarUrl: string | null = null;
+  const client = await clerkClient();
   try {
-    const client = await clerkClient();
     avatarUrl = (await client.users.getUser(id)).imageUrl;
   } catch {
     avatarUrl = null;
   }
+
+  const followerUsers = followerIds.length
+    ? (await client.users.getUserList({ userId: followerIds, limit: 500 })).data
+    : [];
+  const followers = followerUsers.map((u) => ({
+    id: u.id,
+    name: u.fullName || u.username || u.emailAddresses[0]?.emailAddress || "익명",
+  }));
+  const following = followingFriends.map((f) => ({ id: f.followeeId, name: f.followeeName }));
 
   const recentPosts = posts.slice(0, 5).map((p) => ({ slug: p.slug, title: p.title, date: p.date }));
   const postDates = posts.map((p) => p.date);
@@ -75,9 +86,11 @@ export default async function ProfilePage({
           avatarUrl={avatarUrl}
           followerCount={followerCount}
           followingCount={followingCount}
+          followers={followers}
+          following={following}
           editable={userId === id}
           viewerId={userId}
-          initialFollowing={following}
+          initialFollowing={isFollowingUser}
           recentPosts={recentPosts}
           postDates={postDates}
           initialPosition={widgetPosition}

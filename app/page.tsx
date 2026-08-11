@@ -12,7 +12,7 @@ import {
   getWidgetSocial,
 } from "@/lib/profiles";
 import { getLikeCounts } from "@/lib/likes";
-import { getFollowerCount, getFollowingCount } from "@/lib/follows";
+import { getFollowerCount, getFollowingCount, getFollowerIds, getFriends } from "@/lib/follows";
 import EditableTagline from "@/components/profile/EditableTagline";
 import PostFilter from "@/components/post/PostFilter";
 import BannerUpload from "@/components/profile/BannerUpload";
@@ -85,6 +85,8 @@ export default async function Home() {
     widgetSocial,
     followerCount,
     followingCount,
+    followerIds,
+    followingFriends,
   ] = await Promise.all([
     getBannerUrl(userId),
     getBannerPosition(userId),
@@ -94,6 +96,8 @@ export default async function Home() {
     getWidgetSocial(userId),
     getFollowerCount(userId),
     getFollowingCount(userId),
+    getFollowerIds(userId),
+    getFriends(userId),
   ]);
 
   const client = await clerkClient();
@@ -101,6 +105,14 @@ export default async function Home() {
   const authorName = me.fullName || me.username || me.emailAddresses[0]?.emailAddress || "익명";
   const recentPosts = posts.slice(0, 5).map((p) => ({ slug: p.slug, title: p.title, date: p.date }));
   const postDates = posts.map((p) => p.date);
+  const followerUsers = followerIds.length
+    ? (await client.users.getUserList({ userId: followerIds, limit: 500 })).data
+    : [];
+  const followers = followerUsers.map((u) => ({
+    id: u.id,
+    name: u.fullName || u.username || u.emailAddresses[0]?.emailAddress || "익명",
+  }));
+  const following = followingFriends.map((f) => ({ id: f.followeeId, name: f.followeeName }));
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
@@ -118,6 +130,8 @@ export default async function Home() {
           avatarUrl={me.imageUrl}
           followerCount={followerCount}
           followingCount={followingCount}
+          followers={followers}
+          following={following}
           editable
           viewerId={userId}
           initialFollowing={false}

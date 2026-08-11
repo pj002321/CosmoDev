@@ -49,6 +49,8 @@ export async function POST(req: NextRequest) {
           status: "published",
           visibility: "public",
           thumbnail: null,
+          letterSpacing: null,
+          lineHeight: null,
         },
         userId,
         authorName

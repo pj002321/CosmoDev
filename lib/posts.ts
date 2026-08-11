@@ -27,6 +27,8 @@ export type PostInput = {
   status: PostStatus;
   visibility: PostVisibility;
   thumbnail: string | null;
+  letterSpacing: number | null;
+  lineHeight: number | null;
 };
 
 type Row = {
@@ -42,6 +44,8 @@ type Row = {
   visibility: PostVisibility;
   thumbnail: string | null;
   content?: string;
+  letter_spacing?: number | null;
+  line_height?: number | null;
 };
 
 function toMeta(row: Row): PostMeta {
@@ -105,7 +109,8 @@ export async function getPostOwner(slug: string): Promise<{ authorId: string; ti
 
 export async function getPost(slug: string) {
   const rows = (await sql()`
-    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility, thumbnail, content
+    SELECT slug, title, date, summary, tags, author_id, author_name, views, status, visibility, thumbnail,
+      content, letter_spacing, line_height
     FROM posts WHERE slug = ${slug} LIMIT 1
   `) as Row[];
   const row = rows[0];
@@ -114,6 +119,8 @@ export async function getPost(slug: string) {
     ...toMeta(row),
     content: row.content ?? "",
     contentHtml: await renderMarkdown(row.content ?? ""),
+    letterSpacing: row.letter_spacing ?? null,
+    lineHeight: row.line_height ?? null,
   };
 }
 
@@ -129,8 +136,8 @@ export async function incrementViews(slug: string): Promise<number> {
 export async function createPost(input: PostInput, authorId: string, authorName: string) {
   const slug = slugify(input.title, input.date);
   await sql()`
-    INSERT INTO posts (slug, title, date, summary, tags, content, author_id, author_name, status, visibility, thumbnail)
-    VALUES (${slug}, ${input.title}, ${input.date}, ${input.summary}, ${input.tags}, ${input.content}, ${authorId}, ${authorName}, ${input.status}, ${input.visibility}, ${input.thumbnail})
+    INSERT INTO posts (slug, title, date, summary, tags, content, author_id, author_name, status, visibility, thumbnail, letter_spacing, line_height)
+    VALUES (${slug}, ${input.title}, ${input.date}, ${input.summary}, ${input.tags}, ${input.content}, ${authorId}, ${authorName}, ${input.status}, ${input.visibility}, ${input.thumbnail}, ${input.letterSpacing}, ${input.lineHeight})
   `;
   return slug;
 }
@@ -139,7 +146,7 @@ export async function updatePost(slug: string, input: PostInput, authorId: strin
   const rows = (await sql()`
     UPDATE posts SET title = ${input.title}, date = ${input.date}, summary = ${input.summary},
       tags = ${input.tags}, content = ${input.content}, status = ${input.status}, visibility = ${input.visibility},
-      thumbnail = ${input.thumbnail}
+      thumbnail = ${input.thumbnail}, letter_spacing = ${input.letterSpacing}, line_height = ${input.lineHeight}
     WHERE slug = ${slug} AND author_id = ${authorId}
     RETURNING slug
   `) as { slug: string }[];

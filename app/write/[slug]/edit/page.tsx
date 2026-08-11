@@ -29,6 +29,8 @@ export default async function EditPostPage({
           status: post.status,
           visibility: post.visibility,
           thumbnail: post.thumbnail,
+          letterSpacing: post.letterSpacing,
+          lineHeight: post.lineHeight,
         }}
       />
     </div>

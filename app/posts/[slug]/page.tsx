@@ -90,6 +90,10 @@ export default async function PostPage({
 
         <div
           className="prose-post"
+          style={{
+            letterSpacing: post.letterSpacing !== null ? `${post.letterSpacing}em` : undefined,
+            lineHeight: post.lineHeight ?? undefined,
+          }}
           dangerouslySetInnerHTML={{ __html: post.contentHtml }}
         />
 

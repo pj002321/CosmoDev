@@ -15,7 +15,27 @@ type Initial = {
   status: PostStatus;
   visibility: PostVisibility;
   thumbnail: string | null;
+  letterSpacing: number | null;
+  lineHeight: number | null;
 };
+
+const LETTER_SPACINGS = { narrow: -0.02, normal: 0, wide: 0.05 } as const;
+const LINE_HEIGHTS = { narrow: 1.5, normal: 1.8, wide: 2.2 } as const;
+type SpacingKey = keyof typeof LETTER_SPACINGS;
+
+function closestKey<T extends Record<string, number>>(table: T, value: number | null): keyof T {
+  if (value === null) return "normal";
+  let best: keyof T = "normal";
+  let bestDiff = Infinity;
+  for (const k of Object.keys(table) as (keyof T)[]) {
+    const diff = Math.abs(table[k] - value);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = k;
+    }
+  }
+  return best;
+}
 
 type Props = {
   mode: "new" | "edit";
@@ -120,6 +140,12 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [error, setError] = useState("");
   const [previewHtml, setPreviewHtml] = useState("");
   const [imageSize, setImageSize] = useState<"small" | "medium" | "large" | "original">("medium");
+  const [letterSpacingKey, setLetterSpacingKey] = useState<SpacingKey>(() =>
+    closestKey(LETTER_SPACINGS, initial?.letterSpacing ?? null)
+  );
+  const [lineHeightKey, setLineHeightKey] = useState<SpacingKey>(() =>
+    closestKey(LINE_HEIGHTS, initial?.lineHeight ?? null)
+  );
   const [showUnsplash, setShowUnsplash] = useState(false);
   const [showTableBuilder, setShowTableBuilder] = useState(false);
   const [unsplashQuery, setUnsplashQuery] = useState("");
@@ -205,7 +231,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
     }, 3000);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, date, summary, tags, content, visibility, thumbnail, persistedStatus]);
+  }, [title, date, summary, tags, content, visibility, thumbnail, letterSpacingKey, lineHeightKey, persistedStatus]);
 
   // ponytail: execCommand is deprecated but it's still the only way to make a
   // programmatic textarea edit land on the browser's native undo stack
@@ -465,6 +491,8 @@ export default function PostForm({ mode, slug, initial }: Props) {
       status: nextStatus,
       visibility,
       thumbnail,
+      letterSpacing: LETTER_SPACINGS[letterSpacingKey],
+      lineHeight: LINE_HEIGHTS[lineHeightKey],
     };
     try {
       const res = await fetch(
@@ -638,6 +666,27 @@ export default function PostForm({ mode, slug, initial }: Props) {
           <option value="large">크게</option>
           <option value="original">원본</option>
         </select>
+        <span className="w-px h-4 bg-border" />
+        <select
+          value={letterSpacingKey}
+          onChange={(e) => setLetterSpacingKey(e.target.value as SpacingKey)}
+          title="자간"
+          className="font-mono text-xs text-muted border border-border rounded px-1.5 py-1 hover:border-accent bg-transparent cursor-pointer"
+        >
+          <option value="narrow">자간 좁게</option>
+          <option value="normal">자간 보통</option>
+          <option value="wide">자간 넓게</option>
+        </select>
+        <select
+          value={lineHeightKey}
+          onChange={(e) => setLineHeightKey(e.target.value as SpacingKey)}
+          title="행간"
+          className="font-mono text-xs text-muted border border-border rounded px-1.5 py-1 hover:border-accent bg-transparent cursor-pointer"
+        >
+          <option value="narrow">행간 좁게</option>
+          <option value="normal">행간 보통</option>
+          <option value="wide">행간 넓게</option>
+        </select>
         <label className="font-mono text-xs text-muted border border-border rounded px-2 py-1 cursor-pointer hover:border-accent">
           {uploading ? "업로드 중…" : "이미지 삽입"}
           <input
@@ -776,7 +825,11 @@ export default function PostForm({ mode, slug, initial }: Props) {
         </div>
         <div className="bg-surface border border-border rounded px-4 py-3 h-[36rem] overflow-y-auto">
           {previewHtml ? (
-            <div className="prose-post" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+            <div
+              className="prose-post"
+              style={{ letterSpacing: `${LETTER_SPACINGS[letterSpacingKey]}em`, lineHeight: LINE_HEIGHTS[lineHeightKey] }}
+              dangerouslySetInnerHTML={{ __html: previewHtml }}
+            />
           ) : (
             <p className="font-mono text-xs text-muted">미리보기가 여기에 표시됩니다</p>
           )}

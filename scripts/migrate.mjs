@@ -126,4 +126,12 @@ await sql`
   ALTER TABLE profiles ADD COLUMN IF NOT EXISTS widget_social jsonb NOT NULL DEFAULT '{}'
 `;
 
+await sql`
+  ALTER TABLE posts ADD COLUMN IF NOT EXISTS letter_spacing double precision
+`;
+
+await sql`
+  ALTER TABLE posts ADD COLUMN IF NOT EXISTS line_height double precision
+`;
+
 console.log("migrated");

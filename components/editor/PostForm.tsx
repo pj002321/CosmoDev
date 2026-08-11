@@ -174,8 +174,9 @@ export default function PostForm({ mode, slug, initial }: Props) {
   ];
 
   const images = useMemo(() => {
-    const found = [...content.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1]);
-    return [...new Set(found)];
+    const markdown = [...content.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1]);
+    const html = [...content.matchAll(/<img[^>]*\ssrc="([^"]+)"/g)].map((m) => m[1]);
+    return [...new Set([...markdown, ...html])];
   }, [content]);
 
   function setThumbnail(url: string | null) {

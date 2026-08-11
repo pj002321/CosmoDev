@@ -110,4 +110,16 @@ await sql`
   )
 `;
 
+await sql`
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS widget_position text NOT NULL DEFAULT 'right'
+`;
+
+await sql`
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS widget_order jsonb NOT NULL DEFAULT '["recent","calendar","links"]'
+`;
+
+await sql`
+  ALTER TABLE profiles ADD COLUMN IF NOT EXISTS widget_links jsonb NOT NULL DEFAULT '[]'
+`;
+
 console.log("migrated");

@@ -144,6 +144,7 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
   function handlePointerDown(n: Node, e: ReactPointerEvent) {
     e.stopPropagation();
     dragNode.current = n;
+    setHovered(n.id);
     simRef.current?.alphaTarget(0.3).restart();
     const { x, y } = toSvgPoint(e);
     n.fx = x;
@@ -164,6 +165,7 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
       dragNode.current.fy = null;
       dragNode.current = null;
     }
+    setHovered(null);
     simRef.current?.alphaTarget(0);
   }
 
@@ -211,8 +213,6 @@ export default function PostGraph({ posts }: { posts: Post[] }) {
             key={n.id}
             transform={`translate(${n.x},${n.y})`}
             opacity={dim ? 0.2 : 1}
-            onMouseEnter={() => setHovered(n.id)}
-            onMouseLeave={() => setHovered(null)}
             onPointerDown={(e) => handlePointerDown(n, e)}
             onClick={() => n.slug && router.push(`/posts/${n.slug}`)}
             className={n.slug ? "cursor-pointer" : "cursor-grab"}

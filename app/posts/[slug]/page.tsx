@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getPost, incrementViews } from "@/lib/posts";
+import { isFollowing } from "@/lib/follows";
 import { getLikeState } from "@/lib/likes";
 import { getComments } from "@/lib/comments";
 import { EyeIcon } from "@/components/icons";
@@ -21,7 +22,13 @@ export default async function PostPage({
   const [post, { userId }] = await Promise.all([getPost(slug), auth()]);
   if (!post) notFound();
   const isOwner = post.authorId === userId;
-  if (!isOwner && (post.status !== "published" || post.visibility !== "public")) notFound();
+  if (!isOwner) {
+    const visible =
+      post.status === "published" &&
+      (post.visibility === "public" ||
+        (post.visibility === "neighbors" && !!userId && (await isFollowing(userId, post.authorId))));
+    if (!visible) notFound();
+  }
   const [views, likeState, comments] = await Promise.all([
     incrementViews(slug),
     getLikeState(slug, userId),

@@ -12,7 +12,7 @@ type Post = {
   summary: string;
   tags: string[];
   status: "draft" | "published";
-  visibility: "public" | "private";
+  visibility: "public" | "neighbors" | "private";
   thumbnail?: string | null;
 };
 

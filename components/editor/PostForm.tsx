@@ -827,6 +827,15 @@ export default function PostForm({ mode, slug, initial }: Props) {
           </button>
           <button
             type="button"
+            onClick={() => setVisibility("neighbors")}
+            className={`font-mono text-xs px-3 py-1.5 border-l border-border ${
+              visibility === "neighbors" ? "bg-accent text-background" : "text-muted hover:text-accent"
+            }`}
+          >
+            이웃공개
+          </button>
+          <button
+            type="button"
             onClick={() => setVisibility("private")}
             className={`font-mono text-xs px-3 py-1.5 border-l border-border ${
               visibility === "private" ? "bg-accent text-background" : "text-muted hover:text-accent"

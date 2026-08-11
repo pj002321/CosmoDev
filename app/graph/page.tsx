@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getPostsByAuthor } from "@/lib/posts";
+import { isFollowing } from "@/lib/follows";
 import PostGraph from "@/components/graph/PostGraph";
 
 export const dynamic = "force-dynamic";
@@ -18,9 +19,14 @@ export default async function GraphPage({
   const isOwner = targetId === userId;
 
   const rawPosts = await getPostsByAuthor(targetId);
+  const viewerIsNeighbor = !isOwner && (await isFollowing(userId, targetId));
   const posts = isOwner
     ? rawPosts
-    : rawPosts.filter((p) => p.status === "published" && p.visibility === "public");
+    : rawPosts.filter(
+        (p) =>
+          p.status === "published" &&
+          (p.visibility === "public" || (p.visibility === "neighbors" && viewerIsNeighbor))
+      );
   if (posts.length === 0 && !isOwner) notFound();
 
   return (

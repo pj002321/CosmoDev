@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { updatePost, deletePost } from "@/lib/posts";
+import { updatePost, deletePost, normalizeVisibility } from "@/lib/posts";
 
 export async function PUT(
   req: NextRequest,
@@ -24,7 +24,7 @@ export async function PUT(
       tags: tags ?? [],
       content,
       status: status === "draft" ? "draft" : "published",
-      visibility: visibility === "private" ? "private" : "public",
+      visibility: normalizeVisibility(visibility),
       thumbnail: typeof thumbnail === "string" ? thumbnail : null,
     },
     userId

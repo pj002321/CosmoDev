@@ -2,7 +2,7 @@ import { sql } from "@/lib/db";
 import { renderMarkdown } from "@/lib/markdown";
 
 export type PostStatus = "draft" | "published";
-export type PostVisibility = "public" | "private";
+export type PostVisibility = "public" | "neighbors" | "private";
 
 export type PostMeta = {
   slug: string;
@@ -72,6 +72,10 @@ export function slugify(title: string, date: string): string {
 
 export function uniqueTags(posts: { tags: string[] }[]): string[] {
   return [...new Set(posts.flatMap((p) => p.tags))];
+}
+
+export function normalizeVisibility(v: unknown): PostVisibility {
+  return v === "private" || v === "neighbors" ? v : "public";
 }
 
 export async function getAllPosts(): Promise<PostMeta[]> {

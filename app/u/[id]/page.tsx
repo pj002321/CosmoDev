@@ -25,10 +25,15 @@ export default async function ProfilePage({
 }) {
   const { id } = await params;
   const [allPosts, { userId }] = await Promise.all([getPostsByAuthor(id), auth()]);
+  const viewerIsNeighbor = userId && userId !== id ? await isFollowing(userId, id) : false;
   const rawPosts =
     userId === id
       ? allPosts
-      : allPosts.filter((p) => p.status === "published" && p.visibility === "public");
+      : allPosts.filter(
+          (p) =>
+            p.status === "published" &&
+            (p.visibility === "public" || (p.visibility === "neighbors" && viewerIsNeighbor))
+        );
   if (rawPosts.length === 0) notFound();
   const likeCounts = await getLikeCounts(rawPosts.map((p) => p.slug));
   const posts = rawPosts.map((p) => ({ ...p, likeCount: likeCounts[p.slug] ?? 0 }));
@@ -42,7 +47,7 @@ export default async function ProfilePage({
     getWidgetSocial(id),
   ]);
   const categories = uniqueTags(posts);
-  const isFollowingUser = userId && userId !== id ? await isFollowing(userId, id) : false;
+  const isFollowingUser = viewerIsNeighbor;
   const [followerCount, followingCount, followerIds, followingFriends] = await Promise.all([
     getFollowerCount(id),
     getFollowingCount(id),

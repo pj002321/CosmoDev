@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { createPost } from "@/lib/posts";
+import { createPost, normalizeVisibility } from "@/lib/posts";
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       tags: tags ?? [],
       content,
       status: status === "draft" ? "draft" : "published",
-      visibility: visibility === "private" ? "private" : "public",
+      visibility: normalizeVisibility(visibility),
       thumbnail: typeof thumbnail === "string" ? thumbnail : null,
     },
     userId,

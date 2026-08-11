@@ -12,7 +12,7 @@ type Post = {
   likeCount?: number;
   views?: number;
   status?: "draft" | "published";
-  visibility?: "public" | "private";
+  visibility?: "public" | "neighbors" | "private";
   thumbnail?: string | null;
 };
 
@@ -63,6 +63,11 @@ export default function PostCard({
         {post.status === "draft" && (
           <span className="relative z-10 font-mono text-[10px] text-muted border border-border rounded px-1.5 py-0.5 shrink-0">
             임시저장
+          </span>
+        )}
+        {post.visibility === "neighbors" && (
+          <span className="relative z-10 font-mono text-[10px] text-muted border border-border rounded px-1.5 py-0.5 shrink-0">
+            이웃공개
           </span>
         )}
         {post.visibility === "private" && (

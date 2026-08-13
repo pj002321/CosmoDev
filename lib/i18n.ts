@@ -46,7 +46,7 @@ const dict = {
       defaultTagline: "내가 쓴 글",
       all: "전체",
     },
-    footer: "built with next.js · deployed on vercel",
+    footer: "prod by 2026",
   },
   en: {
     nav: {
@@ -90,7 +90,7 @@ const dict = {
       defaultTagline: "Posts I've written",
       all: "All",
     },
-    footer: "built with next.js · deployed on vercel",
+    footer: "prod by 2026",
   },
 } as const;
 

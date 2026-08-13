@@ -51,8 +51,15 @@ const clerkAppearance = {
 } as NonNullable<React.ComponentProps<typeof ClerkProvider>["appearance"]>;
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cosmodev.calzykri.com"),
   title: "CosmoDev",
   description: "개인 개발 일지",
+  openGraph: {
+    title: "CosmoDev",
+    description: "개인 개발 일지",
+    url: "https://cosmodev.calzykri.com",
+    siteName: "CosmoDev",
+  },
 };
 
 const FLARE_STAR_COUNT = 20;

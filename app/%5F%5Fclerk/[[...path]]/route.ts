@@ -31,6 +31,15 @@ async function handler(request: Request) {
   headers.set("Clerk-Secret-Key", process.env.CLERK_SECRET_KEY!);
   headers.set("Clerk-Proxy-Url", `${url.origin}${PROXY_PATH}`);
 
+  if (url.searchParams.has("__debug")) {
+    const debugHeaders = Object.fromEntries(headers.entries());
+    debugHeaders["clerk-secret-key"] = "redacted";
+    return new Response(
+      JSON.stringify({ targetUrl: target.toString(), method: request.method, forwardedHeaders: debugHeaders }),
+      { headers: { "content-type": "application/json" } }
+    );
+  }
+
   const hasBody = request.method !== "GET" && request.method !== "HEAD" && request.body !== null;
   const res = await fetch(target, {
     method: request.method,

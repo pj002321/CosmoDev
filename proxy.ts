@@ -22,5 +22,8 @@ export default clerkMiddleware(async (auth, req) => {
 });
 
 export const config = {
-  matcher: ["/((?!_next|.*\\..*).*)", "/(api|trpc)(.*)"],
+  // ponytail: /__clerk is Clerk's own Frontend API proxy tunnel — clerkMiddleware's
+  // internal handshake call hits the same host_invalid bug our proxy route works
+  // around, so it must never run on this path.
+  matcher: ["/((?!_next|__clerk|.*\\..*).*)", "/(api|trpc)(.*)"],
 };

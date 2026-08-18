@@ -31,7 +31,7 @@ async function handler(request: Request) {
   headers.set("Clerk-Secret-Key", process.env.CLERK_SECRET_KEY!);
   headers.set("Clerk-Proxy-Url", `${url.origin}${PROXY_PATH}`);
 
-  const hasBody = request.body !== null;
+  const hasBody = request.method !== "GET" && request.method !== "HEAD" && request.body !== null;
   const res = await fetch(target, {
     method: request.method,
     headers,

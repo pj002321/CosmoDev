@@ -43,6 +43,12 @@ type Props = {
   initial?: Initial;
 };
 
+type LocalBackup = Initial & { tagsInput: string; savedAt: string };
+
+function localBackupKey(slug: string | undefined) {
+  return `devshot:draft:${slug ?? "new"}`;
+}
+
 type UnsplashPhoto = {
   id: string;
   thumb: string;
@@ -155,6 +161,43 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [langMenu, setLangMenu] = useState<LangMenuState | null>(null);
   const [colorMenu, setColorMenu] = useState<"text" | "bg" | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastSavedAtRef = useRef(0);
+
+  // ponytail: read once on mount, before the backup-write effect below can
+  // overwrite it with the freshly-loaded initial state.
+  const [recovered, setRecovered] = useState<LocalBackup | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem(localBackupKey(slug));
+      if (!raw) return null;
+      const parsed: LocalBackup = JSON.parse(raw);
+      if (parsed.content === (initial?.content ?? "") && parsed.title === (initial?.title ?? "")) return null;
+      return parsed;
+    } catch {
+      return null;
+    }
+  });
+
+  function restoreLocalBackup() {
+    if (!recovered) return;
+    setTitle(recovered.title);
+    setDate(recovered.date);
+    setSummary(recovered.summary);
+    setTags(recovered.tagsInput);
+    setContent(recovered.content);
+    setVisibility(recovered.visibility);
+    setThumbnail(recovered.thumbnail);
+    setLetterSpacingKey(closestKey(LETTER_SPACINGS, recovered.letterSpacing));
+    setLineHeightKey(closestKey(LINE_HEIGHTS, recovered.lineHeight));
+    setRecovered(null);
+  }
+
+  function dismissLocalBackup() {
+    try {
+      localStorage.removeItem(localBackupKey(currentSlug));
+    } catch {}
+    setRecovered(null);
+  }
 
   const slashCommands: { label: string; hint: string; snippet: string; cursorOffset?: number; cursorSelectLength?: number; openTable?: boolean; openLangPicker?: boolean }[] = [
     { label: "표", hint: "테이블", snippet: "", openTable: true },
@@ -223,16 +266,50 @@ export default function PostForm({ mode, slug, initial }: Props) {
   // save could silently alter live content mid-edit. Once persistedStatus
   // becomes "published" (via the 발행 button), autosave stops; only an
   // explicit save can touch it again.
+  //
+  // debounce + max-wait: a plain "save 3s after the last keystroke" never
+  // fires while someone types continuously, so a crash mid-writing loses
+  // everything. Once 15s have passed since the last save, save immediately
+  // instead of waiting for a pause.
   useEffect(() => {
     if (persistedStatus === "published") return;
-    if (!title.trim() || !content.trim()) return;
+    if (!content.trim()) return;
+    const delay = Date.now() - lastSavedAtRef.current > 15000 ? 0 : 3000;
     const timer = setTimeout(() => {
       setAutosaving(true);
+      lastSavedAtRef.current = Date.now();
       persist("draft").finally(() => setAutosaving(false));
-    }, 3000);
+    }, delay);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, date, summary, tags, content, visibility, thumbnail, letterSpacingKey, lineHeightKey, persistedStatus]);
+
+  // ponytail: server autosave still has a network round-trip in the way, so
+  // it can't cover a hard tab crash mid-request. This local snapshot is
+  // synchronous and near-instant, as a last-resort recovery source.
+  useEffect(() => {
+    if (!title.trim() && !content.trim()) return;
+    const timer = setTimeout(() => {
+      const backup: LocalBackup = {
+        title,
+        date,
+        summary,
+        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+        tagsInput: tags,
+        content,
+        status: persistedStatus ?? "draft",
+        visibility,
+        thumbnail,
+        letterSpacing: LETTER_SPACINGS[letterSpacingKey],
+        lineHeight: LINE_HEIGHTS[lineHeightKey],
+        savedAt: new Date().toISOString(),
+      };
+      try {
+        localStorage.setItem(localBackupKey(currentSlug), JSON.stringify(backup));
+      } catch {}
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [title, date, summary, tags, content, visibility, thumbnail, letterSpacingKey, lineHeightKey, persistedStatus, currentSlug]);
 
   // ponytail: execCommand is deprecated but it's still the only way to make a
   // programmatic textarea edit land on the browser's native undo stack
@@ -511,6 +588,9 @@ export default function PostForm({ mode, slug, initial }: Props) {
       }
       setPersistedStatus(nextStatus);
       setSavedAt(new Date());
+      try {
+        localStorage.removeItem(localBackupKey(currentSlug));
+      } catch {}
       return true;
     } catch {
       return false;
@@ -542,6 +622,31 @@ export default function PostForm({ mode, slug, initial }: Props) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {error && <p className="text-sm text-red-400">{error}</p>}
+
+      {recovered && (
+        <div className="flex items-center justify-between gap-3 bg-surface border border-accent rounded px-3 py-2 text-sm">
+          <span>
+            저장되지 않은 작성 내용이 있습니다 (
+            {new Date(recovered.savedAt).toLocaleString("ko-KR", { hour: "2-digit", minute: "2-digit" })})
+          </span>
+          <div className="flex gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={restoreLocalBackup}
+              className="font-mono text-xs border border-accent text-accent rounded px-2.5 py-1"
+            >
+              복구
+            </button>
+            <button
+              type="button"
+              onClick={dismissLocalBackup}
+              className="font-mono text-xs border border-border text-muted rounded px-2.5 py-1 hover:border-accent"
+            >
+              무시
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-4">
         <input

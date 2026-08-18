@@ -8,7 +8,9 @@ export async function POST(req: NextRequest) {
 
   const { title, date, summary, tags, content, status, visibility, thumbnail, letterSpacing, lineHeight } =
     await req.json();
-  if (!title || !date || !content) {
+  // ponytail: drafts can be title-less (autosave fires before the writer
+  // gets to the title field); only publishing requires one.
+  if (!date || !content || (status !== "draft" && !title)) {
     return NextResponse.json({ error: "필수 항목 누락" }, { status: 400 });
   }
 

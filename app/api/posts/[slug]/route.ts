@@ -12,7 +12,7 @@ export async function PUT(
   const { slug } = await params;
   const { title, date, summary, tags, content, status, visibility, thumbnail, letterSpacing, lineHeight } =
     await req.json();
-  if (!title || !date || !content) {
+  if (!date || !content || (status !== "draft" && !title)) {
     return NextResponse.json({ error: "필수 항목 누락" }, { status: 400 });
   }
 

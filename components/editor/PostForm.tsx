@@ -141,6 +141,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
   const [persistedStatus, setPersistedStatus] = useState<PostStatus | null>(initial?.status ?? null);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [autosaving, setAutosaving] = useState(false);
+  const [autosaveError, setAutosaveError] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -278,7 +279,9 @@ export default function PostForm({ mode, slug, initial }: Props) {
     const timer = setTimeout(() => {
       setAutosaving(true);
       lastSavedAtRef.current = Date.now();
-      persist("draft").finally(() => setAutosaving(false));
+      persist("draft")
+        .then((ok) => setAutosaveError(!ok))
+        .finally(() => setAutosaving(false));
     }, delay);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -588,6 +591,7 @@ export default function PostForm({ mode, slug, initial }: Props) {
       }
       setPersistedStatus(nextStatus);
       setSavedAt(new Date());
+      setAutosaveError(false);
       try {
         localStorage.removeItem(localBackupKey(currentSlug));
       } catch {}
@@ -1022,7 +1026,12 @@ export default function PostForm({ mode, slug, initial }: Props) {
         </button>
 
         {autosaving && <span className="font-mono text-xs text-muted">자동 저장 중…</span>}
-        {!autosaving && savedAt && (
+        {!autosaving && autosaveError && (
+          <span className="font-mono text-xs text-red-400">
+            ⚠ 자동 저장 실패 (기기에는 임시 저장됨)
+          </span>
+        )}
+        {!autosaving && !autosaveError && savedAt && (
           <span className="font-mono text-xs text-muted">
             {savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} 자동 저장됨
           </span>

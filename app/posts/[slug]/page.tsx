@@ -10,6 +10,7 @@ import DeletePostButton from "@/components/post/DeletePostButton";
 import LikeButton from "@/components/post/LikeButton";
 import CommentSection from "@/components/post/CommentSection";
 import PostWidthToggle from "@/components/post/PostWidthToggle";
+import PostBody from "@/components/post/PostBody";
 
 export const dynamic = "force-dynamic";
 
@@ -88,13 +89,10 @@ export default async function PostPage({
           <h1 className="text-2xl font-semibold">{post.title}</h1>
         </div>
 
-        <div
-          className="prose-post"
-          style={{
-            letterSpacing: post.letterSpacing !== null ? `${post.letterSpacing}em` : undefined,
-            lineHeight: post.lineHeight ?? undefined,
-          }}
-          dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+        <PostBody
+          contentHtml={post.contentHtml}
+          letterSpacing={post.letterSpacing}
+          lineHeight={post.lineHeight}
         />
 
         <CommentSection

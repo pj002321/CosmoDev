@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Orbitron } from "next/font/google";
 import { ClerkProvider, Show, SignOutButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { GraphIcon, LogoutIcon, ListIcon, PencilIcon, CompassIcon, SettingsIcon } from "@/components/icons";
@@ -23,6 +23,14 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Distinct display face for the "CosmoDev" logo only, apart from the site's
+// mono/sans body fonts.
+const logoFont = Orbitron({
+  variable: "--font-logo",
+  subsets: ["latin"],
+  weight: ["600", "700"],
 });
 
 // @clerk/themes ships its own major version of @clerk/shared, so its
@@ -140,7 +148,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       lang={locale}
       data-theme={theme}
       data-float={floatSetting}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${logoFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <div className="starfield" aria-hidden="true">
@@ -208,7 +216,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <ClerkProvider appearance={clerkAppearance}>
           <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
             <div className="mx-auto max-w-4xl px-6 py-4 flex items-center justify-between">
-              <Link href="/" className="flex items-center gap-2.5 font-mono text-xl font-bold tracking-wide">
+              <Link href="/" className="flex items-center gap-2.5 text-xl font-bold tracking-wide">
                 <span className="flex gap-1">
                   <span className="term-dot" />
                   <span className="term-dot" />

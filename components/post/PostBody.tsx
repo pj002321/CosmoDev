@@ -3,8 +3,6 @@
 import { useEffect, useRef } from "react";
 import TableOfContents from "@/components/post/TableOfContents";
 
-const LONG_PRESS_MS = 1250;
-
 export default function PostBody({
   contentHtml,
   letterSpacing,
@@ -16,39 +14,17 @@ export default function PostBody({
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  // Long-press an image to zoom in; press it again to snap back to size.
+  // Click an image to zoom in; click again to snap back to size.
   useEffect(() => {
     const container = ref.current;
     if (!container) return;
     const images = Array.from(container.querySelectorAll<HTMLImageElement>("img"));
 
-    const cleanups = images.map((img) => {
-      let timer: ReturnType<typeof setTimeout> | null = null;
-      const cancel = () => {
-        if (timer) clearTimeout(timer);
-        timer = null;
-      };
-      const onDown = (e: PointerEvent) => {
-        if (img.classList.contains("img-zoomed")) {
-          img.classList.remove("img-zoomed");
-          return;
-        }
-        img.setPointerCapture(e.pointerId);
-        timer = setTimeout(() => img.classList.add("img-zoomed"), LONG_PRESS_MS);
-      };
-
-      img.addEventListener("pointerdown", onDown);
-      img.addEventListener("pointerup", cancel);
-      img.addEventListener("pointercancel", cancel);
-      return () => {
-        cancel();
-        img.removeEventListener("pointerdown", onDown);
-        img.removeEventListener("pointerup", cancel);
-        img.removeEventListener("pointercancel", cancel);
-      };
-    });
-
-    return () => cleanups.forEach((fn) => fn());
+    const onClick = (e: MouseEvent) => {
+      (e.currentTarget as HTMLImageElement).classList.toggle("img-zoomed");
+    };
+    images.forEach((img) => img.addEventListener("click", onClick));
+    return () => images.forEach((img) => img.removeEventListener("click", onClick));
   }, [contentHtml]);
 
   return (

@@ -68,6 +68,9 @@ export const metadata: Metadata = {
     url: "https://cosmodev.calzykri.com",
     siteName: "CosmoDev",
   },
+  verification: {
+    google: "mBLzq1WF_92GJ5uu6PkyjnMMpw_ukom3JshlNZtEJHo",
+  },
 };
 
 const FLARE_STAR_COUNT = 20;

@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { Geist, Geist_Mono, Orbitron } from "next/font/google";
 import { ClerkProvider, Show, SignOutButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import { koKR, enUS } from "@clerk/localizations";
 import { GraphIcon, LogoutIcon, ListIcon, PencilIcon, CompassIcon, SettingsIcon } from "@/components/icons";
 import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 import ThemeToggle from "@/components/layout/ThemeToggle";
@@ -61,10 +62,10 @@ const clerkAppearance = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://cosmodev.calzykri.com"),
   title: "CosmoDev",
-  description: "개인 개발 일지",
+  description: "매일의 개발 기록과 스쳐가는 생각들을 정리하며, 하나씩 나만의 우주를 만들어가는 곳",
   openGraph: {
     title: "CosmoDev",
-    description: "개인 개발 일지",
+    description: "매일의 개발 기록과 스쳐가는 생각들을 정리하며, 하나씩 나만의 우주를 만들어가는 곳",
     url: "https://cosmodev.calzykri.com",
     siteName: "CosmoDev",
   },
@@ -154,6 +155,18 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${logoFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "CosmoDev",
+              url: "https://cosmodev.calzykri.com",
+            }),
+          }}
+        />
         <div className="starfield" aria-hidden="true">
           {flareStars.map((s, i) => (
             <span
@@ -216,7 +229,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             />
           ))}
         </div>
-        <ClerkProvider appearance={clerkAppearance}>
+        <ClerkProvider appearance={clerkAppearance} localization={locale === "ko" ? koKR : enUS}>
           <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
             <div className="mx-auto max-w-4xl px-6 py-4 flex items-center justify-between">
               <Link href="/" className="flex items-center gap-2.5 text-xl font-bold tracking-wide">

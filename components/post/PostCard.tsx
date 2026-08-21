@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HeartIcon, EyeIcon } from "@/components/icons";
+import PostThumbnail from "@/components/post/PostThumbnail";
 
 type Post = {
   slug: string;
@@ -33,9 +34,8 @@ export default function PostCard({
       className="post-card group border border-border rounded-lg p-5 bg-surface hover:border-accent flex flex-col"
     >
       {post.thumbnail && (
-        <div className="relative z-10 -mx-5 -mt-5 mb-3 aspect-video overflow-hidden rounded-t-lg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={post.thumbnail} alt="" className="w-full h-full object-cover" />
+        <div className="relative z-10 -mx-5 -mt-5 mb-3 aspect-video overflow-hidden rounded-t-lg bg-background">
+          <PostThumbnail src={post.thumbnail} />
         </div>
       )}
       <div className="flex items-center justify-between mb-3">

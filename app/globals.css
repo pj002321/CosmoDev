@@ -341,13 +341,13 @@ html[data-float="off"] .post-card {
 @keyframes page-stack-in {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translate(18px, 14px);
     -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 0%);
     mask-image: linear-gradient(to bottom, black 0%, transparent 0%);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(0, 0);
     -webkit-mask-image: linear-gradient(to bottom, black 100%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 100%, transparent 100%);
   }
@@ -403,7 +403,8 @@ html[data-float="off"] .post-card {
 
 @media (prefers-reduced-motion: reduce) {
   .loading-bar,
-  .loading-dot {
+  .loading-dot,
+  .page-transition {
     animation: none;
   }
 }
@@ -443,6 +444,11 @@ html[data-float="off"] .post-card {
   box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 55%, transparent),
     0 0 24px color-mix(in srgb, var(--accent) 35%, transparent);
   transform: translateY(-1px);
+}
+
+.btn-accent:active {
+  transform: scale(0.96);
+  transition-duration: 0.1s;
 }
 
 .term-bar {
